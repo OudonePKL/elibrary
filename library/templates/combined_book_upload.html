@@ -1,0 +1,19 @@
+<!-- templates/combined_book_upload.html -->
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Upload Book</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+    <h2>Upload Book</h2>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form.book_form.as_p }}
+        {{ form.upload_book_form.as_p }}
+        <button type="submit">Submit</button>
+    </form>
+</body>
+</html>

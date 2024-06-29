@@ -1,0 +1,52 @@
+body {
+    font-family: Arial, sans-serif;
+}
+
+nav {
+    background-color: #f8f8f8;
+    padding: 10px;
+    text-align: center;
+}
+
+nav form {
+    display: inline-block;
+}
+
+nav input {
+    padding: 5px;
+    font-size: 16px;
+}
+
+nav button {
+    padding: 5px 10px;
+    font-size: 16px;
+}
+
+.book-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    padding: 20px;
+}
+
+.book {
+    border: 1px solid #ccc;
+    padding: 10px;
+    width: 200px;
+    text-align: center;
+}
+
+.book-cover {
+    max-width: 100%;
+    height: auto;
+}
+
+.book h2 {
+    font-size: 20px;
+    margin-bottom: 10px;
+}
+
+object {
+    display: block;
+    margin-top: 20px;
+}

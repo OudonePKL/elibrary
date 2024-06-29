@@ -1,0 +1,67 @@
+<!-- templates/book_list.html -->
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Book List</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <style>
+        .book-list {
+            list-style-type: none;
+            padding: 0;
+        }
+        .book-list li {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .book-cover {
+            width: 100px;
+            height: 150px;
+            margin-right: 20px;
+            background-size: cover;
+            background-position: center;
+        }
+        .book-info {
+            flex: 1;
+        }
+        .book-actions {
+            margin-left: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h2>Book List</h2>
+    <a href="{% url 'book_create' %}">Add New Book</a>
+    <ul class="book-list">
+        {% for book in books %}
+            <li>
+                {% if book.uploadbook_set.exists %}
+                    {% with upload_book=book.uploadbook_set.first %}
+                        {% if upload_book.cover %}
+                            <div class="book-cover" style="background-image: url('{{ upload_book.cover.url }}');"></div>
+                        {% else %}
+                            <div class="book-cover" style="background-color: #ccc;"></div>
+                        {% endif %}
+                    {% endwith %}
+                {% else %}
+                    <div class="book-cover" style="background-color: #ccc;"></div>
+                {% endif %}
+                <div class="book-info">
+                    <h3>{{ book.title }}</h3>
+                    <p>Author: {{ book.author }}</p>
+                    <p>Category: {{ book.category.name }}</p>
+                </div>
+                <div class="book-actions">
+                    <a href="{% url 'book_update' book.pk %}">Edit</a>
+                    <a href="{% url 'book_delete' book.pk %}">Delete</a>
+                </div>
+            </li>
+        {% endfor %}
+    </ul>
+</body>
+</html>

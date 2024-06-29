@@ -1,0 +1,37 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Library Home</title>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+</head>
+<body>
+    <nav>
+        <form method="GET" action="{% url 'home' %}">
+            <input type="text" name="q" placeholder="Search books..." value="{{ request.GET.q }}">
+            <button type="submit">Search</button>
+        </form>
+    </nav>
+    <h1>All Books</h1>
+    <div class="book-list">
+        {% for book in books %}
+            <div class="book">
+                <a href="{% url 'book_detail' book.id %}">
+                    {% for upload in book.uploads.all %}
+                        {% if upload.cover %}
+                            <img src="{{ upload.cover.url }}" alt="{{ book.title }} cover" class="book-cover">
+                        {% endif %}
+                    {% endfor %}
+                    <h2>{{ book.title }}</h2>
+                </a>
+                <p>Author: {{ book.author }}</p>
+                <p>Category: {{ book.category.name }}</p>
+                <p>Added by: {{ book.employee.user.username }}</p>
+                <p>Public: {{ book.is_public }}</p>
+            </div>
+        {% endfor %}
+    </div>
+</body>
+</html>

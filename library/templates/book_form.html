@@ -1,0 +1,19 @@
+<!-- templates/book_form.html -->
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Book Form</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+    <h2>Book Form</h2>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ book_form.as_p }}
+        {{ upload_book_form.as_p }}
+        <button type="submit">Save</button>
+    </form>
+</body>
+</html>
