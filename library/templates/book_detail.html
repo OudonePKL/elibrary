@@ -117,13 +117,11 @@
 
             {% for upload in uploads %}
             <div class="d-flex">
-              <object data="{{ upload.file.url }}" type="application/pdf">
-                <a
+              <a
                   class="btn btn-outline-dark flex-shrink-0 me-3"
                   href="{{ upload.file.url }}"
                   >Read</a
                 >
-              </object>
               <a
                 class="btn btn-outline-dark flex-shrink-0 me-3"
                 href="{{ upload.file.url }}"
