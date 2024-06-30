@@ -64,12 +64,9 @@ class UploadBook(models.Model):
         return self.book.title
 
 class DownloadBook(models.Model):
-    book = models.ForeignKey(Book, on_delete=models.CASCADE, related_name='downloads')
-    member = models.ForeignKey(Member, on_delete=models.CASCADE, related_name='downloads')
-    download_date = models.DateField(auto_now_add=True)
-
-    class Meta:
-        unique_together = ('book', 'member')
+    user = models.ForeignKey(UserModel, on_delete=models.CASCADE)
+    book = models.ForeignKey(Book, on_delete=models.CASCADE)
+    download_time = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f'{self.book.title} downloaded by {self.member.user.email}'
+        return f'{self.book.title} downloaded by {self.user.email}'
