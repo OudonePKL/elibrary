@@ -2,43 +2,52 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from users.models import UserModel
-from .models import Book, UploadBook, Member, Employee
+from .models import Book, UploadBook, Member, Employee, Category
 
+
+class CategoryForm(forms.ModelForm):
+    class Meta:
+        model = Category
+        fields = ['name']
 
 class EmployeeForm(forms.ModelForm):
     class Meta:
         model = Employee
         fields = ['first_name', 'last_name', 'position', 'date_of_birth', 'phone']
+
+class MemberForm(forms.ModelForm):
+    class Meta:
+        model = Member
+        fields = ['address', 'phone']
         
 class BookForm(forms.ModelForm):
     class Meta:
         model = Book
-        fields = ['title', 'author', 'category', 'employee', 'is_public']
+        fields = ['title', 'author', 'category', 'employee', 'is_public', 'publication_date']
 
 class UploadBookForm(forms.ModelForm):
     class Meta:
         model = UploadBook
         fields = ['file', 'cover']
 
-class CombinedBookUploadForm(forms.Form):
-    book_form = BookForm()
-    upload_book_form = UploadBookForm()
-
-
-# class CombinedBookUploadForm(forms.ModelForm):
-#     class Meta:
-#         model = Book  # Use Book model since we're combining BookForm and UploadBookForm
-#         fields = ['title', 'author', 'category', 'employee', 'is_public', 'file', 'cover']
-
+class BookUploadForm(forms.Form):
+    title = forms.CharField(max_length=200)
+    author = forms.CharField(max_length=200)
+    category = forms.ModelChoiceField(queryset=Category.objects.all())
+    employee = forms.ModelChoiceField(queryset=Employee.objects.all())
+    is_public = forms.BooleanField(required=False)
+    publication_date = forms.DateField(required=False)
+    file = forms.FileField()
+    cover = forms.ImageField(required=False)
 
 
 class UserRegistrationForm2(UserCreationForm):
     address = forms.CharField(max_length=255, required=False)
-    phone_number = forms.CharField(max_length=15, required=False)
+    phone = forms.CharField(max_length=15, required=False)
 
     class Meta:
         model = UserModel
-        fields = ['email', 'profile_image', 'password1', 'password2', 'address', 'phone_number']
+        fields = ['email', 'profile_image', 'password1', 'password2', 'address', 'phone']
 
     def save(self, commit=True):
         user = super().save(commit=False)
@@ -47,14 +56,14 @@ class UserRegistrationForm2(UserCreationForm):
             Member.objects.create(
                 user=user,
                 address=self.cleaned_data['address'],
-                phone_number=self.cleaned_data['phone_number']
+                phone=self.cleaned_data['phone']
             )
         return user
 
 class MemberRegistrationForm(UserCreationForm):
     email = forms.EmailField(required=True)
     address = forms.CharField(required=False)
-    phone_number = forms.CharField(required=False)
+    phone = forms.CharField(required=False)
 
     class Meta:
         model = UserModel
@@ -65,7 +74,7 @@ class MemberRegistrationForm(UserCreationForm):
         user.email = self.cleaned_data['email']
         if commit:
             user.save()
-            Member.objects.create(user=user, address=self.cleaned_data['address'], phone_number=self.cleaned_data['phone_number'])
+            Member.objects.create(user=user, address=self.cleaned_data['address'], phone=self.cleaned_data['phone'])
         return user
     
 

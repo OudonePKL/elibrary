@@ -27,7 +27,7 @@ class Member(models.Model):
     user = models.OneToOneField(UserModel, on_delete=models.CASCADE)
     membership_date = models.DateField(auto_now_add=True)
     address = models.CharField(max_length=255, null=True, blank=True)
-    phone_number = models.CharField(
+    phone = models.CharField(
         max_length=15,
         validators=[RegexValidator(r'^\+?1?\d{9,15}$', message="Phone number must be entered in the format: '+999999999'. Up to 15 digits allowed.")],
         null=True, blank=True
@@ -49,7 +49,6 @@ class Book(models.Model):
     employee = models.ForeignKey(Employee, on_delete=models.CASCADE, related_name='books')
     is_public = models.BooleanField(default=True)
     publication_date = models.DateField(null=True, blank=True)
-    isbn = models.CharField(max_length=13, unique=True, null=True, blank=True)
 
     def __str__(self):
         return self.title
