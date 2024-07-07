@@ -57,7 +57,7 @@
                     <p>Category: {{ book.category.name }}</p>
                 </div>
                 <div class="book-actions">
-                    <a href="{% url 'book_update' book.pk %}">Edit</a>
+                    <a href="{% url 'book_edit' book.pk %}">Edit</a>
                     <a href="{% url 'book_delete' book.pk %}">Delete</a>
                 </div>
             </li>

@@ -1,0 +1,79 @@
+{% load static %}
+<!-- Sidebar -->
+<ul
+        class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion"
+        id="accordionSidebar"
+      >
+        <!-- Sidebar - Brand -->
+        <a
+          class="sidebar-brand d-flex align-items-center justify-content-center"
+          href="{% url 'home' %}"
+        >
+          <div class="sidebar-brand-icon rotate-n-15">
+            {% comment %} <i class="fas fa-laugh-wink"></i> {% endcomment %}
+          </div>
+          <div class="sidebar-brand-text mx-3">SIRI Admin</div>
+        </a>
+
+        <!-- Divider -->
+        <hr class="sidebar-divider my-0" />
+
+        <!-- Nav Item - Dashboard -->
+        <li class="nav-item active">
+          <a class="nav-link" href="{% url 'admin_dashboard' %}">
+            <i class="fas fa-fw fa-tachometer-alt"></i>
+            <span>Dashboard</span></a
+          >
+        </li>
+
+        <!-- Divider -->
+        <hr class="sidebar-divider" />
+
+        <!-- Heading -->
+        <div class="sidebar-heading">User managements</div>
+
+        <li class="nav-item">
+          <a class="nav-link" href="{% url "employee_list" %}">
+            <i class="fas fa-users fa-chart-area"></i>
+            <span>Employees</span></a
+          >
+        </li>
+
+        <li class="nav-item">
+          <a class="nav-link" href="{% url "member_list" %}">
+            <i class="fas fa-users fa-table"></i>
+            <span>Members</span></a
+          >
+        </li>
+
+        <!-- Divider -->
+        <hr class="sidebar-divider" />
+
+        <!-- Heading -->
+        <div class="sidebar-heading">Books managements</div>
+
+        <!-- Nav Item - Charts -->
+        <li class="nav-item">
+          <a class="nav-link" href="{% url "category_list" %}">
+            <i class="fas fa-fw fa-chart-area"></i>
+            <span>Categories</span></a
+          >
+        </li>
+
+        <!-- Nav Item - Tables -->
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'book_list' %}">
+            <i class="fas fa-fw fa-table"></i>
+            <span>Books</span></a
+          >
+        </li>
+
+        <!-- Divider -->
+        <hr class="sidebar-divider d-none d-md-block" />
+
+        <!-- Sidebar Toggler (Sidebar) -->
+        <div class="text-center d-none d-md-inline">
+          <button class="rounded-circle border-0" id="sidebarToggle"></button>
+        </div>
+      </ul>
+<!-- End of Sidebar -->

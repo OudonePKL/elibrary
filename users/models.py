@@ -50,7 +50,6 @@ class UserManager(BaseUserManager):
     def create_superuser(self, email, password=None):
         user = self.create_user(email=email, password=password)
         user.is_admin = True  # Indicates superuser status
-        user.is_employee = True  # If all admins are employees
         user.save(using=self._db)
         return user
 
@@ -63,7 +62,6 @@ class UserModel(AbstractBaseUser):
     profile_image = models.FileField(
         verbose_name="Profile image", null=True, blank=True, upload_to="profile"
     )
-    is_employee = models.BooleanField(default=False, verbose_name="Employee")
     is_active = models.BooleanField(default=True)
     is_admin = models.BooleanField(default=False, verbose_name="Administrator")
 

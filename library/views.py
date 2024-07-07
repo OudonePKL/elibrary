@@ -4,10 +4,11 @@ from django.db.models import Q
 from django.contrib.admin.views.decorators import staff_member_required
 from .models import Employee, Member, Category, Book, UploadBook, DownloadBook
 from django.db import models
+from django.forms import modelformset_factory
 
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.decorators import login_required
-from .forms import MemberRegistrationForm, EmployeeRegistrationForm, EmployeeForm, BookUploadForm, MemberForm, CategoryForm
+from .forms import MemberRegistrationForm, EmployeeRegistrationForm, EmployeeForm, BookForm, UploadBookFormSet, MemberForm, CategoryForm
 from django.core.paginator import Paginator
 from django.contrib import messages
 from django.http import HttpResponse
@@ -109,76 +110,85 @@ def download_book(request, book_id):
 
 # ================ Dashboard ================
 # Book management 
-def book_list(request):
-    books = Book.objects.all()
-    return render(request, 'admin/book_list.html', {'books': books})
 
-def book_detail(request, pk):
-    book = get_object_or_404(Book, pk=pk)
-    uploads = UploadBook.objects.filter(book=book)
-    return render(request, 'admin/book_detail.html', {'book': book, 'uploads': uploads})
+# def book_create(request):
+#     if request.method == 'POST':
+#         form = BookForm(request.POST, request.FILES)
+#         if form.is_valid():
+#             book = form.save()
+#             messages.success(request, 'Book created successfully!')
+#             return redirect('book_create')
+#         else:
+#             messages.error(request, 'Error creating book. Please check the form.')
+#     else:
+#         form = BookForm()
+
+#     return render(request, 'admin/book/book_create.html', {'form': form})
 
 def book_create(request):
-    if request.method == "POST":
-        form = BookUploadForm(request.POST, request.FILES)
+    if request.method == 'POST':
+        form = BookForm(request.POST, request.FILES)
         if form.is_valid():
-            book = Book(
-                title=form.cleaned_data['title'],
-                author=form.cleaned_data['author'],
-                category=form.cleaned_data['category'],
-                employee=form.cleaned_data['employee'],
-                is_public=form.cleaned_data['is_public'],
-                publication_date=form.cleaned_data['publication_date'],
-            )
-            book.save()
-            upload = UploadBook(
-                book=book,
-                file=form.cleaned_data['file'],
-                cover=form.cleaned_data['cover'],
-            )
-            upload.save()
-            return redirect('book_detail', pk=book.pk)
+            book = form.save()
+            file = form.cleaned_data['file']
+            cover = form.cleaned_data['cover']
+            if file or cover:
+                UploadBook.objects.create(book=book, file=file, cover=cover)
+            messages.success(request, 'Book created successfully!')
+            return redirect('book_create')
+        else:
+            messages.error(request, 'Error creating book. Please check the form.')
     else:
-        form = BookUploadForm()
-    return render(request, 'admin/book_create.html', {'form': form})
+        form = BookForm()
 
-def book_update(request, pk):
+    return render(request, 'admin/book/book_create.html', {'form': form})
+
+
+
+def book_edit(request, pk):
     book = get_object_or_404(Book, pk=pk)
-    upload = get_object_or_404(UploadBook, book=book)
-    if request.method == "POST":
-        form = BookUploadForm(request.POST, request.FILES)
+    try:
+        upload = book.uploads.get()
+    except UploadBook.DoesNotExist:
+        upload = None
+    
+    if request.method == 'POST':
+        form = BookForm(request.POST, request.FILES, instance=book)
         if form.is_valid():
-            book.title = form.cleaned_data['title']
-            book.author = form.cleaned_data['author']
-            book.category = form.cleaned_data['category']
-            book.employee = form.cleaned_data['employee']
-            book.is_public = form.cleaned_data['is_public']
-            book.publication_date = form.cleaned_data['publication_date']
-            book.save()
-            upload.file = form.cleaned_data['file']
-            upload.cover = form.cleaned_data['cover']
-            upload.save()
-            return redirect('book_detail', pk=book.pk)
+            book = form.save()
+            file = form.cleaned_data['file']
+            cover = form.cleaned_data['cover']
+            if upload:
+                if file:
+                    upload.file = file
+                if cover:
+                    upload.cover = cover
+                upload.save()
+            else:
+                if file or cover:
+                    UploadBook.objects.create(book=book, file=file, cover=cover)
+            messages.success(request, 'Book updated successfully!')
+            return redirect('book_list')
+        else:
+            messages.error(request, 'Error updating book. Please check the form.')
     else:
-        initial_data = {
-            'title': book.title,
-            'author': book.author,
-            'category': book.category,
-            'employee': book.employee,
-            'is_public': book.is_public,
-            'publication_date': book.publication_date,
-            'file': upload.file,
-            'cover': upload.cover,
-        }
-        form = BookUploadForm(initial=initial_data)
-    return render(request, 'books/book_detail.html', {'form': form})
+        form = BookForm(instance=book)
+
+    return render(request, 'admin/book/book_edit.html', {'form': form, 'book': book})
 
 def book_delete(request, pk):
     book = get_object_or_404(Book, pk=pk)
-    if request.method == "POST":
-        book.delete()
-        return redirect('book_list')
-    return render(request, 'books/book_confirm_delete.html', {'book': book})
+    book.delete() 
+    messages.success(request, 'Book deleted successfully!')
+    return redirect(reverse('book_list'))
+
+def book_list(request):
+    books = Book.objects.all()
+    return render(request, 'admin/book/book_list.html', {'books': books})
+
+# def book_detail(request, book_id):
+#     book = get_object_or_404(Book, pk=book_id)
+#     return render(request, 'admin/book/book_detail.html', {'book': book})
 
 # Employee management
 @staff_member_required
@@ -210,7 +220,10 @@ def employee_create(request):
         form = EmployeeRegistrationForm(request.POST)
         if form.is_valid():
             user = form.save()
-            return redirect('employee_list')  # Redirect to a home page or any other page after registration
+            messages.success(request, 'Employee created successfully!')
+            return redirect('employee_create')
+        else:
+            messages.error(request, 'Error creating employee. Please check the form.')
     else:
         form = EmployeeRegistrationForm()
     return render(request, 'admin/employee/employee_create.html', {'form': form})
@@ -224,19 +237,33 @@ def employee_list(request):
 def employee_delete(request, pk):
     employee = get_object_or_404(Employee, pk=pk)
     employee.user.delete()  # This will also delete the employee due to the OneToOne relationship
+    messages.success(request, 'Employee deleted successfully!')
     return redirect(reverse('employee_list'))
 
 @staff_member_required
 def employee_edit(request, pk):
-    employee = get_object_or_404(Employee, pk=pk)
+    employee = get_object_or_404(Employee, id=pk)
+    
     if request.method == 'POST':
-        form = EmployeeForm(request.POST, instance=employee)
+        form = EmployeeRegistrationForm(request.POST, instance=employee)
         if form.is_valid():
-            form.save()
-            return redirect(reverse('employee_list'))
+            user = form.save(commit=False)
+            user.email = form.cleaned_data['email']
+            user.first_name = form.cleaned_data['first_name']
+            user.last_name = form.cleaned_data['last_name']
+            user.date_of_birth = form.cleaned_data['date_of_birth']
+            user.phone = form.cleaned_data['phone']
+            user.position = form.cleaned_data['position']
+            user.save()
+            
+            messages.success(request, 'Employee updated successfully!')
+            return redirect('employee_edit', pk=employee.id)  # Redirect to the same page or another view
+        else:
+            messages.error(request, 'Error updating employee. Please check the form.')
     else:
-        form = EmployeeForm(instance=employee)
-    return render(request, 'admin/employee/employee_edit.html', {'form': form})
+        form = EmployeeRegistrationForm(instance=employee)
+    
+    return render(request, 'admin/employee/employee_edit.html', {'form': form, 'employee': employee})
 
 
 # Member management
@@ -251,7 +278,10 @@ def member_create(request):
         form = MemberRegistrationForm(request.POST)
         if form.is_valid():
             user = form.save()
-            return redirect('member_list')  # Redirect to a home page or any other page after registration
+            messages.success(request, 'Member created successfully!')
+            return redirect('member_create')
+        else:
+            messages.error(request, 'Error creating member. Please check the form.')
     else:
         form = MemberRegistrationForm()
     return render(request, 'admin/member/member_create.html', {'form': form})
@@ -260,6 +290,7 @@ def member_create(request):
 def member_delete(request, pk):
     member = get_object_or_404(Member, pk=pk)
     member.user.delete()  # This will also delete the member due to the OneToOne relationship
+    messages.success(request, 'Member deleted successfully!')
     return redirect(reverse('member_list'))
 
 @staff_member_required
@@ -269,7 +300,10 @@ def member_edit(request, pk):
         form = MemberForm(request.POST, instance=member)
         if form.is_valid():
             form.save()
+            messages.success(request, 'Member edited successfully!')
             return redirect(reverse('member_list'))
+        else:
+            messages.error(request, 'Error updating member. Please check the form.')
     else:
         form = MemberForm(instance=member)
     return render(request, 'admin/member/member_edit.html', {'form': form})
@@ -281,12 +315,20 @@ def category_list(request):
     categories = Category.objects.all()
     return render(request, 'admin/category/category_list.html', {'categories': categories})
 
+def category_detail(request, pk):
+    category = get_object_or_404(Category, pk=pk)
+    return render(request, 'admin/category/category_detail.html', {'category': category})
+
 @staff_member_required
 def category_create(request):
     if request.method == 'POST':
         form = CategoryForm(request.POST)
         if form.is_valid():
-            return redirect('category_list')  # Redirect to a home page or any other page after registration
+            form.save()
+            messages.success(request, 'Category created successfully!')
+            return redirect('category_create')  
+        else:
+            messages.error(request, 'Error creating category. Please check the form.')
     else:
         form = CategoryForm()
     return render(request, 'admin/category/category_create.html', {'form': form})
@@ -294,20 +336,36 @@ def category_create(request):
 @staff_member_required
 def category_delete(request, pk):
     category = get_object_or_404(Category, pk=pk)
-    category.delete()  # This will also delete the category due to the OneToOne relationship
+    category.delete()  
+    messages.success(request, 'Category deleted successfully!')
     return redirect(reverse('category_list'))
 
 @staff_member_required
-def category_edit(request, pk):
+def category_edit2(request, pk):
     category = get_object_or_404(Category, pk=pk)
     if request.method == 'POST':
         form = CategoryForm(request.POST, instance=category)
         if form.is_valid():
             form.save()
+            messages.success(request, 'Category updated successfully!')
             return redirect(reverse('category_list'))
+        else:
+            messages.error(request, 'Error updating category. Please check the form.')
     else:
         form = CategoryForm(instance=category)
-    return render(request, 'admin/category/category_edit.html', {'form': form})
+    return render(request, 'admin/category/category_create.html', {'form': form})
+
+def category_edit(request, pk):
+    category = get_object_or_404(Category, pk=pk)
+    
+    if request.method == 'POST':
+        category.name = request.POST.get('name')
+        category.save()
+        messages.success(request, 'Category updated successfully!')
+        return redirect(reverse('category_list'))
+    else:
+        messages.error(request, 'Error updating category. Please check the form.')
+    return render(request, 'admin/category/category_edit.html', {'category': category})
 
 # Book management
 # @staff_member_required

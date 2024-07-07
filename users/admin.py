@@ -57,9 +57,9 @@ class UserAdmin(BaseUserAdmin):
     form = UserChangeForm
     add_form = UserCreationForm
 
-    list_display = ["id", "email", "is_active", "is_employee", "is_admin"]
+    list_display = ["id", "email", "is_active", "is_admin"]
     list_display_links = [ "email"]
-    list_filter = ["is_admin", "is_active", "is_employee"]
+    list_filter = ["is_admin", "is_active"]
     fieldsets = [
         (
             None,
@@ -81,7 +81,7 @@ class UserAdmin(BaseUserAdmin):
                 ]
             },
         ),
-        ("authority", {"fields": ["is_admin", "is_employee"]}),
+        ("authority", {"fields": ["is_admin",]}),
     ]
     add_fieldsets = [
         (
