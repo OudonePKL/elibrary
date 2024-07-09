@@ -244,6 +244,7 @@ def employee_delete(request, pk):
 @staff_member_required
 def employee_edit(request, pk):
     user = get_object_or_404(UserModel, pk=pk)  # Ensure this matches the UserModel's primary key field
+    employee = get_object_or_404(Employee, user=user)
     print(pk)
     print(user)
     if request.method == 'POST':
@@ -257,6 +258,8 @@ def employee_edit(request, pk):
             messages.error(request, 'Error updating employee. Please check the form.')
     else:
         form = EmployeeEditForm(instance=user)
+        if employee.date_of_birth:
+            form.initial['date_of_birth'] = employee.date_of_birth.strftime('%Y-%m-%d')
     return render(request, 'admin/employee/employee_edit.html', {'form': form})
 
 
