@@ -29,10 +29,6 @@
       href="{% static 'assets/css/sb-admin-2.min.css' %}"
       rel="stylesheet"
     />
-
-    
-
-
   </head>
 
   <body id="page-top">
@@ -56,16 +52,15 @@
             <div
               class="d-sm-flex align-items-center justify-content-between mb-4"
             >
-              <h1 class="h3 mb-0 text-gray-800">Member edit</h1>
+              <h1 class="h3 mb-0 text-gray-800">Employee Edit</h1>
             </div>
 
             <!-- Content Row -->
             <section class="section">
               <div class="card">
                 <div class="card-body">
-                  
                   <!-- General Form Elements -->
-                  <form method="post">
+                  <form method="post" action="{% url 'employee_create' %}">
                     {% csrf_token %}
                     <div class="row mb-3">
                       <label for="email" class="col-sm-2 col-form-label"
@@ -77,28 +72,52 @@
                           class="form-control"
                           name="email"
                           id="email"
-                          value="{{ form.email.value }}" 
                           required
                         />
                       </div>
                     </div>
-
                     <div class="row mb-3">
-                        <label for="address" class="col-sm-2 col-form-label"
-                          >Address</label
-                        >
-                        <div class="col-sm-10">
-                          <input
-                            type="text"
-                            class="form-control"
-                            name="address"
-                            id="address"
-                            value="{{ form.initial.address }}" 
-                            required
-                          />
-                        </div>
+                      <label for="first_name" class="col-sm-2 col-form-label"
+                        >First name</label
+                      >
+                      <div class="col-sm-10">
+                        <input
+                          type="text"
+                          class="form-control"
+                          name="first_name"
+                          id="first_name"
+                          required
+                        />
                       </div>
-                    
+                    </div>
+                    <div class="row mb-3">
+                      <label for="last_name" class="col-sm-2 col-form-label"
+                        >Last name</label
+                      >
+                      <div class="col-sm-10">
+                        <input
+                          type="text"
+                          class="form-control"
+                          name="last_name"
+                          id="last_name"
+                          required
+                        />
+                      </div>
+                    </div>
+                    <div class="row mb-3">
+                      <label for="date_of_birth" class="col-sm-2 col-form-label"
+                        >Date of Birth</label
+                      >
+                      <div class="col-sm-10">
+                        <input
+                          type="date"
+                          class="form-control"
+                          name="date_of_birth"
+                          id="date_of_birth"
+                          required
+                        />
+                      </div>
+                    </div>
                     <div class="row mb-3">
                       <label for="phone" class="col-sm-2 col-form-label"
                         >Phone</label
@@ -109,13 +128,30 @@
                           class="form-control"
                           name="phone"
                           id="phone"
-                          value="{{ form.initial.phone }}" 
                           required
                         />
                       </div>
                     </div>
 
-                    {% comment %} <div class="row mb-3">
+                    <div class="row mb-3">
+                      <label for="position" class="col-sm-2 col-form-label"
+                        >Category</label
+                      >
+                      <div class="col-sm-10">
+                        <select
+                          name="position"
+                          id="position"
+                          class="form-select"
+                          aria-label="Default select example"
+                        >
+                          {% for key, value in form.fields.position.choices %}
+                          <option value="{{ key }}">{{ value }}</option>
+                          {% endfor %}
+                        </select>
+                      </div>
+                    </div>
+
+                    <div class="row mb-3">
                       <label for="password1" class="col-sm-2 col-form-label"
                         >Password</label
                       >
@@ -142,15 +178,15 @@
                           required
                         />
                       </div>
-                    </div> {% endcomment %}
+                    </div>
 
                     <div class="row mb-3">
                       <label class="col-sm-2 col-form-label"
-                        ></label
+                        >Submit Button</label
                       >
                       <div class="col-sm-10">
                         <button type="submit" class="btn btn-primary">
-                          Submit
+                          Submit Form
                         </button>
                       </div>
                     </div>
@@ -171,8 +207,6 @@
       <!-- End of Content Wrapper -->
     </div>
     <!-- End of Page Wrapper -->
-
-    
 
     <!-- Bootstrap core JavaScript-->
     <script src="{% static 'assets/vendor/jquery/jquery.min.js' %}"></script>

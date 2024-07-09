@@ -59,34 +59,43 @@ class MemberRegistrationForm(UserCreationForm):
             Member.objects.create(user=user, address=self.cleaned_data['address'], phone=self.cleaned_data['phone'])
         return user
     
+class MemberEditForm(forms.ModelForm):
+    email = forms.EmailField(required=True)
+    address = forms.CharField(required=True)
+    phone = forms.CharField(required=True)
 
-# class EmployeeRegistrationForm(UserCreationForm):
-#     email = forms.EmailField(required=True)
-#     first_name = forms.CharField(required=True)
-#     last_name = forms.CharField(required=True)
-#     date_of_birth = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}), required=True)
-#     phone = forms.CharField(required=True)
-#     position = forms.ChoiceField(choices=Employee.POSITION_CHOICES, required=True)
+    class Meta:
+        model = UserModel
+        fields = ('email',)
 
-#     class Meta:
-#         model = UserModel
-#         fields = ('email', 'password1', 'password2')
+    def __init__(self, *args, **kwargs):
+        instance = kwargs.get('instance')
+        if instance and hasattr(instance, 'member'):
+            initial = {
+                'email': instance.email,
+                'address': instance.member.address,
+                'phone': instance.member.phone,
+            }
+            kwargs['initial'] = initial
+        super().__init__(*args, **kwargs)
 
-#     def save(self, commit=True):
-#         user = super(EmployeeRegistrationForm, self).save(commit=False)
-#         user.email = self.cleaned_data['email']
-#         user.is_admin = True
-#         if commit:
-#             user.save()
-#             Employee.objects.create(
-#                 user=user,
-#                 first_name=self.cleaned_data['first_name'],
-#                 last_name=self.cleaned_data['last_name'],
-#                 date_of_birth=self.cleaned_data['date_of_birth'],
-#                 phone=self.cleaned_data['phone'],
-#                 position=self.cleaned_data['position']
-#             )
-#         return user
+    def save(self, commit=True):
+        user = super(MemberEditForm, self).save(commit=False)
+        user.email = self.cleaned_data['email']
+        if commit:
+            user.save()
+            if hasattr(user, 'member'):
+                member = user.member
+                member.address = self.cleaned_data['address']
+                member.phone = self.cleaned_data['phone']
+                member.save()
+            else:
+                Employee.objects.create(
+                    user=user,
+                    address=self.cleaned_data['address'],
+                    phone=self.cleaned_data['phone'],
+                )
+        return user
 
 class EmployeeRegistrationForm(forms.ModelForm):
     email = forms.EmailField(required=True)
@@ -137,7 +146,58 @@ class EmployeeRegistrationForm(forms.ModelForm):
                     position=self.cleaned_data['position']
                 )
         return user
-    
+
+
+class EmployeeEditForm(forms.ModelForm):
+    email = forms.EmailField(required=True)
+    first_name = forms.CharField(required=True)
+    last_name = forms.CharField(required=True)
+    date_of_birth = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}), required=True)
+    phone = forms.CharField(required=True)
+    position = forms.ChoiceField(choices=Employee.POSITION_CHOICES, required=True)
+
+    class Meta:
+        model = UserModel
+        fields = ('email',)
+
+    def __init__(self, *args, **kwargs):
+        instance = kwargs.get('instance')
+        if instance and hasattr(instance, 'employee'):
+            initial = {
+                'email': instance.email,
+                'first_name': instance.employee.first_name,
+                'last_name': instance.employee.last_name,
+                'date_of_birth': instance.employee.date_of_birth,
+                'phone': instance.employee.phone,
+                'position': instance.employee.position,
+            }
+            kwargs['initial'] = initial
+        super().__init__(*args, **kwargs)
+
+    def save(self, commit=True):
+        user = super(EmployeeEditForm, self).save(commit=False)
+        user.email = self.cleaned_data['email']
+        if commit:
+            user.save()
+            if hasattr(user, 'employee'):
+                employee = user.employee
+                employee.first_name = self.cleaned_data['first_name']
+                employee.last_name = self.cleaned_data['last_name']
+                employee.date_of_birth = self.cleaned_data['date_of_birth']
+                employee.phone = self.cleaned_data['phone']
+                employee.position = self.cleaned_data['position']
+                employee.save()
+            else:
+                Employee.objects.create(
+                    user=user,
+                    first_name=self.cleaned_data['first_name'],
+                    last_name=self.cleaned_data['last_name'],
+                    date_of_birth=self.cleaned_data['date_of_birth'],
+                    phone=self.cleaned_data['phone'],
+                    position=self.cleaned_data['position']
+                )
+        return user
+
 class UserLoginForm(AuthenticationForm):
     class Meta:
         model = UserModel

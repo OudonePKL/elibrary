@@ -102,7 +102,7 @@
                         <td>{{ employee.phone }}</td>
                         <td>
                           <a
-                            href="{% url 'employee_edit' employee.id %}"
+                            href="{% url 'employee_edit' employee.user.id %}"
                             class="btn btn-primary"
                             >Edit</a
                           >

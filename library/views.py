@@ -5,10 +5,11 @@ from django.contrib.admin.views.decorators import staff_member_required
 from .models import Employee, Member, Category, Book, UploadBook, DownloadBook
 from django.db import models
 from django.forms import modelformset_factory
+from users.models import UserModel
 
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.decorators import login_required
-from .forms import MemberRegistrationForm, EmployeeRegistrationForm, EmployeeForm, BookForm, UploadBookFormSet, MemberForm, CategoryForm
+from .forms import MemberRegistrationForm, MemberEditForm, EmployeeRegistrationForm, EmployeeEditForm, EmployeeForm, BookForm, UploadBookFormSet, MemberForm, CategoryForm
 from django.core.paginator import Paginator
 from django.contrib import messages
 from django.http import HttpResponse
@@ -242,28 +243,21 @@ def employee_delete(request, pk):
 
 @staff_member_required
 def employee_edit(request, pk):
-    employee = get_object_or_404(Employee, id=pk)
-    
+    user = get_object_or_404(UserModel, pk=pk)  # Ensure this matches the UserModel's primary key field
+    print(pk)
+    print(user)
     if request.method == 'POST':
-        form = EmployeeRegistrationForm(request.POST, instance=employee)
+        form = EmployeeEditForm(request.POST, instance=user)
         if form.is_valid():
-            user = form.save(commit=False)
-            user.email = form.cleaned_data['email']
-            user.first_name = form.cleaned_data['first_name']
-            user.last_name = form.cleaned_data['last_name']
-            user.date_of_birth = form.cleaned_data['date_of_birth']
-            user.phone = form.cleaned_data['phone']
-            user.position = form.cleaned_data['position']
-            user.save()
-            
+            form.save()
             messages.success(request, 'Employee updated successfully!')
-            return redirect('employee_edit', pk=employee.id)  # Redirect to the same page or another view
+            return redirect('employee_list')
+            # return redirect('employee_edit', pk=user.pk)
         else:
             messages.error(request, 'Error updating employee. Please check the form.')
     else:
-        form = EmployeeRegistrationForm(instance=employee)
-    
-    return render(request, 'admin/employee/employee_edit.html', {'form': form, 'employee': employee})
+        form = EmployeeEditForm(instance=user)
+    return render(request, 'admin/employee/employee_edit.html', {'form': form})
 
 
 # Member management
@@ -295,17 +289,20 @@ def member_delete(request, pk):
 
 @staff_member_required
 def member_edit(request, pk):
-    member = get_object_or_404(Member, pk=pk)
+    user = get_object_or_404(UserModel, pk=pk)  # Ensure this matches the UserModel's primary key field
+    print(pk)
+    print(user)
     if request.method == 'POST':
-        form = MemberForm(request.POST, instance=member)
+        form = MemberEditForm(request.POST, instance=user)
         if form.is_valid():
             form.save()
-            messages.success(request, 'Member edited successfully!')
-            return redirect(reverse('member_list'))
+            messages.success(request, 'Member updated successfully!')
+            return redirect('member_list')
+            # return redirect('member_edit', pk=user.pk)
         else:
             messages.error(request, 'Error updating member. Please check the form.')
     else:
-        form = MemberForm(instance=member)
+        form = MemberEditForm(instance=user)
     return render(request, 'admin/member/member_edit.html', {'form': form})
 
 
