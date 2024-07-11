@@ -174,6 +174,8 @@ def book_edit(request, pk):
             messages.error(request, 'Error updating book. Please check the form.')
     else:
         form = BookForm(instance=book)
+        if book.publication_date:
+            form.initial['publication_date'] = book.publication_date.strftime('%Y-%m-%d')
 
     return render(request, 'admin/book/book_edit.html', {'form': form, 'book': book})
 
