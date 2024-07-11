@@ -4,37 +4,23 @@
   <head>
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1, shrink-to-fit=no"
-    />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
     <meta name="description" content="" />
     <meta name="author" content="" />
 
     <title>Admin Dashboard</title>
 
     <!-- Custom fonts for this template-->
-    <link
-      href="{% static 'assets/vendor/fontawesome-free/css/all.min.css' %}"
-      rel="stylesheet"
-      type="text/css"
-    />
-    <link
-      href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i"
-      rel="stylesheet"
-    />
+    <link href="{% static 'assets/vendor/fontawesome-free/css/all.min.css' %}" rel="stylesheet" type="text/css" />
+    <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet" />
 
     <!-- Custom styles for this template-->
-    <link
-      href="{% static 'assets/css/sb-admin-2.min.css' %}"
-      rel="stylesheet"
-    />
+    <link href="{% static 'assets/css/sb-admin-2.min.css' %}" rel="stylesheet" />
 
     <!-- Vendor CSS Files -->
     <link href="{% static 'assets/vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
     <link href="{% static 'assets/vendor/bootstrap-icons/bootstrap-icons.css' %}" rel="stylesheet">
     <link href="{% static 'assets/vendor/boxicons/css/boxicons.min.css' %}" rel="stylesheet">
-    
   </head>
 
   <body id="page-top">
@@ -52,10 +38,8 @@
           {% include '../topbar.html' %}
           
           <div class="container-fluid">
-            <div
-              class="d-sm-flex align-items-center justify-content-between mb-4"
-            >
-              <h1 class="h3 mb-0 text-gray-800">Book create</h1>
+            <div class="d-sm-flex align-items-center justify-content-between mb-4">
+              <h1 class="h3 mb-0 text-gray-800">Book Create</h1>
             </div>
             
             <!-- Display success and error messages -->
@@ -75,64 +59,121 @@
                     <div class="card">
                       <div class="card-body">
 
-                        
-
                         <form method="post" enctype="multipart/form-data">
                             {% csrf_token %}
                             
                             <div class="row mb-3">
                               <label for="id_title" class="col-sm-2 col-form-label">Title</label>
                               <div class="col-sm-10">
-                                {{ form.title }}
+                                <input
+                                  type="text"
+                                  class="form-control"
+                                  name="title"
+                                  id="id_title"
+                                  value="{{ form.title.value|default_if_none:'' }}"
+                                  required
+                                />
                               </div>
                             </div>
                           
                             <div class="row mb-3">
                               <label for="id_author" class="col-sm-2 col-form-label">Author</label>
                               <div class="col-sm-10">
-                                {{ form.author }}
+                                <input
+                                  type="text"
+                                  class="form-control"
+                                  name="author"
+                                  id="id_author"
+                                  value="{{ form.author.value|default_if_none:'' }}"
+                                  required
+                                />
                               </div>
                             </div>
                           
                             <div class="row mb-3">
                               <label for="id_category" class="col-sm-2 col-form-label">Category</label>
                               <div class="col-sm-10">
-                                {{ form.category }}
+                                <select
+                                  class="form-select"
+                                  name="category"
+                                  id="id_category"
+                                  required
+                                >
+                                  {% for value, name in form.category.field.choices %}
+                                  <option value="{{ value }}" {% if form.category.value == value %}selected{% endif %}>{{ name }}</option>
+                                  {% endfor %}
+                                </select>
                               </div>
                             </div>
                           
                             <div class="row mb-3">
                               <label for="id_employee" class="col-sm-2 col-form-label">Employee</label>
                               <div class="col-sm-10">
-                                {{ form.employee }}
+                                <select
+                                  class="form-select"
+                                  name="employee"
+                                  id="id_employee"
+                                  required
+                                >
+                                  {% for value, name in form.employee.field.choices %}
+                                  <option value="{{ value }}" {% if form.employee.value == value %}selected{% endif %}>{{ name }}</option>
+                                  {% endfor %}
+                                </select>
                               </div>
                             </div>
                           
                             <div class="row mb-3">
                               <legend class="col-form-label col-sm-2 pt-0">Is public</legend>
                               <div class="col-sm-10">
-                                {{ form.is_public }}
+                                <div class="form-check">
+                                  <input
+                                    class="form-check-input"
+                                    type="checkbox"
+                                    name="is_public"
+                                    id="id_is_public"
+                                    {% if form.is_public.value %}checked{% endif %}
+                                  />
+                                </div>
                               </div>
                             </div>
                           
                             <div class="row mb-3">
                               <label for="id_publication_date" class="col-sm-2 col-form-label">Publication date</label>
                               <div class="col-sm-10">
-                                {{ form.publication_date }}
+                                <input
+                                  type="date"
+                                  class="form-control"
+                                  name="publication_date"
+                                  id="id_publication_date"
+                                  value="{{ form.publication_date.value|default_if_none:'' }}"
+                                  required
+                                />
                               </div>
                             </div>
                           
                             <div class="row mb-3">
                               <label for="id_file" class="col-sm-2 col-form-label">Book file</label>
                               <div class="col-sm-10">
-                                {{ form.file }}
+                                <input
+                                  type="file"
+                                  class="form-control"
+                                  name="file"
+                                  id="id_file"
+                                  required
+                                />
                               </div>
                             </div>
                           
                             <div class="row mb-3">
                               <label for="id_cover" class="col-sm-2 col-form-label">Book cover</label>
                               <div class="col-sm-10">
-                                {{ form.cover }}
+                                <input
+                                  type="file"
+                                  class="form-control"
+                                  name="cover"
+                                  id="id_cover"
+                                  required
+                                />
                               </div>
                             </div>
                             
@@ -142,7 +183,6 @@
                               </div>
                             </div>
                           </form>
-                          
                           
                       </div>
                     </div>

@@ -82,62 +82,121 @@
                             <div class="row mb-3">
                               <label for="id_title" class="col-sm-2 col-form-label">Title</label>
                               <div class="col-sm-10">
-                                {{ form.title }}
+                                <input
+                                  type="text"
+                                  class="form-control"
+                                  name="title"
+                                  id="id_title"
+                                  value="{{ form.title.value|default_if_none:'' }}"
+                                  required
+                                />
                               </div>
                             </div>
                           
                             <div class="row mb-3">
                               <label for="id_author" class="col-sm-2 col-form-label">Author</label>
                               <div class="col-sm-10">
-                                {{ form.author }}
+                                <input
+                                  type="text"
+                                  class="form-control"
+                                  name="author"
+                                  id="id_author"
+                                  value="{{ form.author.value|default_if_none:'' }}"
+                                  required
+                                />
                               </div>
                             </div>
                           
                             <div class="row mb-3">
                               <label for="id_category" class="col-sm-2 col-form-label">Category</label>
                               <div class="col-sm-10">
-                                {{ form.category }}
+                                <select
+                                  class="form-select"
+                                  name="category"
+                                  id="id_category"
+                                  required
+                                >
+                                  {% for value, name in form.category.field.choices %}
+                                  <option value="{{ value }}" {% if form.category.value == value %}selected{% endif %}>{{ name }}</option>
+                                  {% endfor %}
+                                </select>
                               </div>
                             </div>
                           
                             <div class="row mb-3">
                               <label for="id_employee" class="col-sm-2 col-form-label">Employee</label>
                               <div class="col-sm-10">
-                                {{ form.employee }}
+                                <select
+                                  class="form-select"
+                                  name="employee"
+                                  id="id_employee"
+                                  required
+                                >
+                                  {% for value, name in form.employee.field.choices %}
+                                  <option value="{{ value }}" {% if form.employee.value == value %}selected{% endif %}>{{ name }}</option>
+                                  {% endfor %}
+                                </select>
                               </div>
                             </div>
                           
                             <div class="row mb-3">
                               <legend class="col-form-label col-sm-2 pt-0">Is public</legend>
                               <div class="col-sm-10">
-                                {{ form.is_public }}
+                                <div class="form-check">
+                                  <input
+                                    class="form-check-input"
+                                    type="checkbox"
+                                    name="is_public"
+                                    id="id_is_public"
+                                    {% if form.is_public.value %}checked{% endif %}
+                                  />
+                                </div>
                               </div>
                             </div>
                           
                             <div class="row mb-3">
                               <label for="id_publication_date" class="col-sm-2 col-form-label">Publication date</label>
                               <div class="col-sm-10">
-                                {{ form.publication_date }}
+                                <input
+                                  type="date"
+                                  class="form-control"
+                                  name="publication_date"
+                                  id="id_publication_date"
+                                  value="{{ form.publication_date.value|default_if_none:'' }}"
+                                  required
+                                />
                               </div>
                             </div>
                           
                             <div class="row mb-3">
                               <label for="id_file" class="col-sm-2 col-form-label">Book file</label>
                               <div class="col-sm-10">
-                                {{ form.file }}
+                                <input
+                                  type="file"
+                                  class="form-control"
+                                  name="file"
+                                  id="id_file"
+                                  required
+                                />
                               </div>
                             </div>
                           
                             <div class="row mb-3">
                               <label for="id_cover" class="col-sm-2 col-form-label">Book cover</label>
                               <div class="col-sm-10">
-                                {{ form.cover }}
+                                <input
+                                  type="file"
+                                  class="form-control"
+                                  name="cover"
+                                  id="id_cover"
+                                  required
+                                />
                               </div>
                             </div>
                             
                             <div class="row mb-3">
                               <div class="col-sm-10 offset-sm-2">
-                                <button type="submit" class="btn btn-primary">Update Book</button>
+                                <button type="submit" class="btn btn-primary">Submit Form</button>
                               </div>
                             </div>
                           </form>
