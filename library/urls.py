@@ -24,6 +24,8 @@ urlpatterns = [
     path('member_create/', views.member_create, name='member_create'),
     path('member/<int:pk>/delete/', views.member_delete, name='member_delete'),
     path('member/<int:pk>/edit/', views.member_edit, name='member_edit'),
+    path('approve_member/<int:member_id>/', views.approve_member, name='approve_member'),
+    path('reject_member/<int:member_id>/', views.reject_member, name='reject_member'),
     # category management
     path('category_list/', views.category_list, name='category_list'),
     path('category_create/', views.category_create, name='category_create'),

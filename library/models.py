@@ -32,6 +32,7 @@ class Member(models.Model):
         validators=[RegexValidator(r'^\+?1?\d{9,15}$', message="Phone number must be entered in the format: '+999999999'. Up to 15 digits allowed.")],
         null=True, blank=True
     )
+    is_approved = models.BooleanField(default=False)
 
     def __str__(self):
         return self.user.email
@@ -49,6 +50,7 @@ class Book(models.Model):
     employee = models.ForeignKey(Employee, on_delete=models.CASCADE, related_name='books')
     is_public = models.BooleanField(default=True)
     publication_date = models.DateField(null=True, blank=True)
+    ispn = models.CharField(max_length=200)
 
     def __str__(self):
         return self.title
@@ -65,7 +67,7 @@ class UploadBook(models.Model):
 class DownloadBook(models.Model):
     user = models.ForeignKey(UserModel, on_delete=models.CASCADE)
     book = models.ForeignKey(Book, on_delete=models.CASCADE)
-    download_time = models.DateTimeField(auto_now_add=True)
+    download_date = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f'{self.book.title} downloaded by {self.user.email}'

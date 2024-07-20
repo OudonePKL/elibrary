@@ -4,6 +4,7 @@ from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from users.models import UserModel
 from .models import Book, UploadBook, Member, Employee, Category
 from django.forms import inlineformset_factory
+from django.core.exceptions import ValidationError
 
 
 class CategoryForm(forms.ModelForm):
@@ -42,6 +43,46 @@ class UserRegistrationForm2(UserCreationForm):
             )
         return user
 
+# class MemberRegistrationForm(UserCreationForm):
+#     email = forms.EmailField(required=True)
+#     address = forms.CharField(required=False)
+#     phone = forms.CharField(required=False)
+
+#     class Meta:
+#         model = UserModel
+#         fields = ('email', 'password1', 'password2')
+
+#     def save(self, commit=True):
+#         user = super(MemberRegistrationForm, self).save(commit=False)
+#         user.email = self.cleaned_data['email']
+#         if commit:
+#             user.save()
+#             Member.objects.create(user=user, address=self.cleaned_data['address'], phone=self.cleaned_data['phone'])
+#         return user
+
+class AdminMemberCreationForm(UserCreationForm):
+    email = forms.EmailField(required=True)
+    address = forms.CharField(required=False)
+    phone = forms.CharField(required=False)
+
+    class Meta:
+        model = UserModel
+        fields = ('email', 'password1', 'password2')
+
+    def save(self, commit=True):
+        user = super(AdminMemberCreationForm, self).save(commit=False)
+        user.email = self.cleaned_data['email']
+        user.is_active = True  # Automatically activate user
+        if commit:
+            user.save()
+            Member.objects.create(
+                user=user,
+                address=self.cleaned_data['address'],
+                phone=self.cleaned_data['phone'],
+                is_approved=True  # Automatically approve member
+            )
+        return user
+
 class MemberRegistrationForm(UserCreationForm):
     email = forms.EmailField(required=True)
     address = forms.CharField(required=False)
@@ -50,6 +91,12 @@ class MemberRegistrationForm(UserCreationForm):
     class Meta:
         model = UserModel
         fields = ('email', 'password1', 'password2')
+
+    def clean_email(self):
+        email = self.cleaned_data.get('email')
+        if UserModel.objects.filter(email=email).exists():
+            raise ValidationError("A user with that email already exists.")
+        return email
 
     def save(self, commit=True):
         user = super(MemberRegistrationForm, self).save(commit=False)
@@ -211,7 +258,7 @@ class BookForm(forms.ModelForm):
 
     class Meta:
         model = Book
-        fields = ['title', 'author', 'category', 'employee', 'is_public', 'publication_date']
+        fields = ['title', 'author', 'ispn', 'category', 'employee', 'is_public', 'publication_date']
 
 class UploadBookForm(forms.ModelForm):
     class Meta:

@@ -58,7 +58,7 @@
             <div
               class="d-sm-flex align-items-center justify-content-between mb-4"
             >
-              <h1 class="h3 mb-0 text-gray-800">Book list</h1>
+              <h1 class="h3 mb-0 text-gray-800">Member list</h1>
             </div>
 
             <!-- Display success and error messages -->
@@ -75,35 +75,39 @@
             <section class="section">
               <div class="card">
                 <div class="card-body">
-                  <a href="{%url 'book_create' %}" class="btn btn-success">Add Book</a>
+                  <a href="{%url 'member_create' %}" class="btn btn-success"
+                    >Add Member</a
+                  >
                   <!-- Default Table -->
                   <table class="table">
                     <thead>
                       <tr>
                         <th scope="col">#</th>
-                        <th scope="col">Title</th>
-                        <th scope="col">Author</th>
-                        <th scope="col">Category</th>
-                        <th scope="col">Employee</th>
-                        <th scope="col">Public</th>
-                        <th scope="col">ISPN</th>
-                        <th scope="col">Actions</th>
+                        <th>Email</th>
+                        <th>Address</th>
+                        <th>Phone</th>
+                        <th>Actions</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {% for book in books %}
+                      {% for member in members %}
                       <tr>
-                        <td>{{ forloop.counter }}</th>
-                        <td>{{ book.title }}</td>
-                        <td>{{ book.author }}</td>
-                        <td>{{ book.category }}</td>
-                        <td>{{ book.employee }}</td>
-                        <td>{{ book.is_public }}</td>
-                        <td>{{ book.ispn }}</td>
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ member.user.email }}</td>
+                        <td>{{ member.address }}</td>
+                        <td>{{ member.phone }}</td>
                         <td>
-                            <a href="{% url 'book_edit' book.pk %}" class="btn btn-primary">Edit</a>
-                            {% comment %} <a href="{% url 'book_update' book.id %}" class="btn btn-primary">Edit</a> {% endcomment %}
-                            <a href="{% url 'book_delete' book.pk %}" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this book?');">Delete</a>
+                          <a
+                            href="{% url 'member_edit' member.user.id %}"
+                            class="btn btn-primary"
+                            >Edit</a
+                          >
+                          <a
+                            href="{% url 'member_delete' member.id %}"
+                            class="btn btn-danger"
+                            onclick="return confirm('Are you sure you want to delete this member?');"
+                            >Delete</a
+                          >
                         </td>
                       </tr>
                       {% endfor %}
@@ -125,6 +129,8 @@
       <!-- End of Content Wrapper -->
     </div>
     <!-- End of Page Wrapper -->
+
+    
 
     <!-- Bootstrap core JavaScript-->
     <script src="{% static 'assets/vendor/jquery/jquery.min.js' %}"></script>

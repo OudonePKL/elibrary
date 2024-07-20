@@ -9,7 +9,7 @@ from users.models import UserModel
 
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.decorators import login_required
-from .forms import MemberRegistrationForm, MemberEditForm, EmployeeRegistrationForm, EmployeeEditForm, EmployeeForm, BookForm, UploadBookFormSet, MemberForm, CategoryForm
+from .forms import MemberRegistrationForm, MemberEditForm, EmployeeRegistrationForm, EmployeeEditForm, EmployeeForm, BookForm, UploadBookFormSet, MemberForm, CategoryForm, AdminMemberCreationForm
 from django.core.paginator import Paginator
 from django.contrib import messages
 from django.http import HttpResponse
@@ -48,15 +48,54 @@ def book_detail(request, book_id):
     page_obj = paginator.get_page(page_number)
     return render(request, 'book_detail.html', {'book': book, 'uploads': uploads, 'page_obj': page_obj})
 
+# def register_member(request):
+#     if request.method == 'POST':
+#         form = MemberRegistrationForm(request.POST)
+#         if form.is_valid():
+#             user = form.save()
+#             messages.success(request, 'Member created successfully!')
+#             return redirect('home')
+#         else:
+#             messages.error(request, 'Error creating member. Please check the form.')
+#     else:
+#         form = MemberRegistrationForm()
+#     return render(request, 'registration/register_member.html', {'form': form})
+
+# def register_member(request):
+#     if request.method == 'POST':
+#         form = MemberRegistrationForm(request.POST)
+#         if form.is_valid():
+#             user = form.save(commit=False)
+#             user.is_active = False  # Prevent user from logging in until approved
+#             user.save()
+#             Member.objects.create(user=user, address=form.cleaned_data['address'], phone=form.cleaned_data['phone'])
+#             messages.success(request, 'Registration successful! Your account needs to be approved by an admin before you can log in.')
+#             return redirect('home')
+#         else:
+#             messages.error(request, 'Error creating member. Please check the form.')
+#     else:
+#         form = MemberRegistrationForm()
+#     return render(request, 'registration/register_member.html', {'form': form})
+
 def register_member(request):
     if request.method == 'POST':
         form = MemberRegistrationForm(request.POST)
-        if form.is_valid():
-            user = form.save()
-            login(request, user)
-            return redirect('home')  # Redirect to a home page or any other page after registration
+        email = request.POST.get('email')
+        
+        if UserModel.objects.filter(email=email).exists():
+            messages.error(request, 'A user with that email already exists.')
+        elif form.is_valid():
+            user = form.save(commit=False)
+            user.is_active = True  
+            user.save()
+            Member.objects.create(user=user, address=form.cleaned_data['address'], phone=form.cleaned_data['phone'])
+            messages.success(request, 'Registration successful! Your account needs to be approved by an admin before you can log in.')
+            return redirect('login')
+        else:
+            messages.error(request, 'Error creating member. Please check the form.')
     else:
         form = MemberRegistrationForm()
+    
     return render(request, 'registration/register_member.html', {'form': form})
 
 def register_employee(request):
@@ -70,16 +109,38 @@ def register_employee(request):
         form = EmployeeRegistrationForm()
     return render(request, 'registration/register_employee.html', {'form': form})
 
+# def login_view(request):
+#     if request.method == 'POST':
+#         email = request.POST['email']
+#         password = request.POST['password']
+#         user = authenticate(request, username=email, password=password)
+#         if user is not None:
+#             login(request, user)
+#             return redirect('home')  # Redirect to a success page.
+#         else:
+#             messages.error(request, 'Invalid email or password.')
+#     return render(request, 'registration/login.html')
+
 def login_view(request):
     if request.method == 'POST':
         email = request.POST['email']
         password = request.POST['password']
         user = authenticate(request, username=email, password=password)
+        print(user)
         if user is not None:
-            login(request, user)
-            return redirect('home')  # Redirect to a success page.
+            try:
+                if user.member.is_approved:
+                    login(request, user)
+                    return redirect('home')  # Redirect to a success page.
+                else:
+                    messages.warning(request, 'Your account is not yet approved by an admin.')
+            except Member.DoesNotExist:
+                messages.error(request, 'Invalid email or password2.')
+
+            # login(request, user)
+            # return redirect('home')  # Redirect to a success page.
         else:
-            messages.error(request, 'Invalid email or password.')
+            messages.error(request, 'Invalid email or password1.')
     return render(request, 'registration/login.html')
 
 @login_required
@@ -186,7 +247,7 @@ def book_delete(request, pk):
     return redirect(reverse('book_list'))
 
 def book_list(request):
-    books = Book.objects.all()
+    books = Book.objects.all().order_by('-id')
     return render(request, 'admin/book/book_list.html', {'books': books})
 
 # def book_detail(request, book_id):
@@ -224,6 +285,8 @@ def employee_create(request):
         form = EmployeeRegistrationForm(request.POST)
         if form.is_valid():
             user = form.save()
+            user.is_admin = True
+            user.save()
             messages.success(request, 'Employee created successfully!')
             return redirect('employee_create')
         else:
@@ -234,7 +297,7 @@ def employee_create(request):
 
 @staff_member_required
 def employee_list(request):
-    employees = Employee.objects.all()
+    employees = Employee.objects.all().order_by('-id')
     return render(request, 'admin/employee/employee_list.html', {'employees': employees})
 
 @staff_member_required
@@ -269,21 +332,25 @@ def employee_edit(request, pk):
 # Member management
 @staff_member_required
 def member_list(request):
-    members = Member.objects.all()
+    members = Member.objects.all().order_by('-id')
     return render(request, 'admin/member/member_list.html', {'members': members})
 
 @staff_member_required
 def member_create(request):
+    if not request.user.is_staff:
+        return redirect('home')  # Only allow staff to access this view
+
     if request.method == 'POST':
-        form = MemberRegistrationForm(request.POST)
+        form = AdminMemberCreationForm(request.POST)
         if form.is_valid():
-            user = form.save()
-            messages.success(request, 'Member created successfully!')
-            return redirect('member_create')
+            form.save()
+            messages.success(request, 'Member added successfully!')
+            return redirect('employee_create')  # Redirect to the member list page for admin
         else:
-            messages.error(request, 'Error creating member. Please check the form.')
+            messages.error(request, 'Error adding member. Please check the form.')
     else:
-        form = MemberRegistrationForm()
+        form = AdminMemberCreationForm()
+    
     return render(request, 'admin/member/member_create.html', {'form': form})
 
 @staff_member_required
@@ -311,11 +378,31 @@ def member_edit(request, pk):
         form = MemberEditForm(instance=user)
     return render(request, 'admin/member/member_edit.html', {'form': form})
 
+@staff_member_required
+def approve_member(request, member_id):
+    member = get_object_or_404(Member, id=member_id)
+    member.is_approved = True
+    member.user.is_active = True  # Make the user active
+    member.user.save()
+    member.save()
+    messages.success(request, f'{member.user.email} has been approved.')
+    return redirect('member_list')
+
+@staff_member_required
+def reject_member(request, member_id):
+    member = get_object_or_404(Member, id=member_id)
+    member.is_approved = False
+    member.user.is_active = False  # Make the user inactive
+    member.user.save()
+    member.save()
+    messages.success(request, f'{member.user.email} has been rejected.')
+    return redirect('member_list')
+
 
 # Category management
 @staff_member_required
 def category_list(request):
-    categories = Category.objects.all()
+    categories = Category.objects.all().order_by('-id')
     return render(request, 'admin/category/category_list.html', {'categories': categories})
 
 def category_detail(request, pk):
