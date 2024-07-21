@@ -75,16 +75,21 @@
             <section class="section">
               <div class="card">
                 <div class="card-body">
-                  <a href="{%url 'category_create' %}" class="btn btn-success"
-                    >Add Category</a
-                  >
+                  {% if user.is_authenticated and user.employee.position == "GENERAL" %}
+                    <a href="{%url 'category_create' %}" class="btn btn-success"
+                      >Add Category</a
+                    >
+                  {% endif %}
+                  
                   <!-- Default Table -->
                   <table class="table">
                     <thead>
                       <tr>
                         <th>#</th>
                         <th>Category name</th>
-                        <th>Actions</th>
+                        {% if user.is_authenticated and user.employee.position == "GENERAL" %}
+                        <th scope="col">Actions</th>
+                        {% endif %}
                       </tr>
                     </thead>
                     <tbody>
@@ -92,6 +97,7 @@
                       <tr>
                         <td>{{ forloop.counter }}</th>
                         <td>{{ category.name }}</td>
+                        {% if user.is_authenticated and user.employee.position == "GENERAL" %}
                         <td>
                           <a
                             href="{% url 'category_edit' category.id %}"
@@ -105,6 +111,8 @@
                             >Delete</a
                           >
                         </td>
+                        {% endif %}
+                        
                       </tr>
                       {% endfor %}
                     </tbody>

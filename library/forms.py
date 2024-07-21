@@ -30,7 +30,7 @@ class UserRegistrationForm2(UserCreationForm):
 
     class Meta:
         model = UserModel
-        fields = ['email', 'profile_image', 'password1', 'password2', 'address', 'phone']
+        fields = ['email', 'password1', 'password2', 'address', 'phone']
 
     def save(self, commit=True):
         user = super().save(commit=False)
@@ -194,6 +194,34 @@ class EmployeeRegistrationForm(forms.ModelForm):
                 )
         return user
 
+class AdminEmployeeCreationForm(UserCreationForm):
+    email = forms.EmailField(required=True)
+    first_name = forms.CharField(required=True)
+    last_name = forms.CharField(required=True)
+    date_of_birth = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}), required=True)
+    phone = forms.CharField(required=True)
+    position = forms.ChoiceField(choices=Employee.POSITION_CHOICES, required=True)
+
+    class Meta:
+        model = UserModel
+        fields = ('email', 'password1', 'password2')
+
+    def save(self, commit=True):
+        user = super(AdminEmployeeCreationForm, self).save(commit=False)
+        user.email = self.cleaned_data['email']
+        user.is_active = True  # Automatically activate user
+        user.is_admin = True  # Automatically admin user
+        if commit:
+            user.save()
+            Member.objects.create(
+                user=user,
+                first_name=self.cleaned_data['first_name'],
+                last_name=self.cleaned_data['last_name'],
+                date_of_birth=self.cleaned_data['date_of_birth'],
+                phone=self.cleaned_data['phone'],
+                position=self.cleaned_data['position']
+            )
+        return user
 
 class EmployeeEditForm(forms.ModelForm):
     email = forms.EmailField(required=True)

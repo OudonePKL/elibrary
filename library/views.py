@@ -9,7 +9,7 @@ from users.models import UserModel
 
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.decorators import login_required
-from .forms import MemberRegistrationForm, MemberEditForm, EmployeeRegistrationForm, EmployeeEditForm, EmployeeForm, BookForm, UploadBookFormSet, MemberForm, CategoryForm, AdminMemberCreationForm
+from .forms import MemberRegistrationForm, MemberEditForm, EmployeeRegistrationForm, EmployeeEditForm, EmployeeForm, BookForm, UploadBookFormSet, MemberForm, CategoryForm, AdminMemberCreationForm, AdminEmployeeCreationForm
 from django.core.paginator import Paginator
 from django.contrib import messages
 from django.http import HttpResponse
@@ -48,34 +48,6 @@ def book_detail(request, book_id):
     page_obj = paginator.get_page(page_number)
     return render(request, 'book_detail.html', {'book': book, 'uploads': uploads, 'page_obj': page_obj})
 
-# def register_member(request):
-#     if request.method == 'POST':
-#         form = MemberRegistrationForm(request.POST)
-#         if form.is_valid():
-#             user = form.save()
-#             messages.success(request, 'Member created successfully!')
-#             return redirect('home')
-#         else:
-#             messages.error(request, 'Error creating member. Please check the form.')
-#     else:
-#         form = MemberRegistrationForm()
-#     return render(request, 'registration/register_member.html', {'form': form})
-
-# def register_member(request):
-#     if request.method == 'POST':
-#         form = MemberRegistrationForm(request.POST)
-#         if form.is_valid():
-#             user = form.save(commit=False)
-#             user.is_active = False  # Prevent user from logging in until approved
-#             user.save()
-#             Member.objects.create(user=user, address=form.cleaned_data['address'], phone=form.cleaned_data['phone'])
-#             messages.success(request, 'Registration successful! Your account needs to be approved by an admin before you can log in.')
-#             return redirect('home')
-#         else:
-#             messages.error(request, 'Error creating member. Please check the form.')
-#     else:
-#         form = MemberRegistrationForm()
-#     return render(request, 'registration/register_member.html', {'form': form})
 
 def register_member(request):
     if request.method == 'POST':
@@ -83,7 +55,7 @@ def register_member(request):
         email = request.POST.get('email')
         
         if UserModel.objects.filter(email=email).exists():
-            messages.error(request, 'A user with that email already exists.')
+            messages.error(request, 'This email already exist.')
         elif form.is_valid():
             user = form.save(commit=False)
             user.is_active = True  
@@ -121,26 +93,56 @@ def register_employee(request):
 #             messages.error(request, 'Invalid email or password.')
 #     return render(request, 'registration/login.html')
 
+# def login_view(request):
+#     if request.method == 'POST':
+#         email = request.POST['email']
+#         password = request.POST['password']
+#         user = authenticate(request, username=email, password=password)
+#         print(user)
+#         if user is not None:
+#             try:
+#                 if user.member.is_approved:
+#                     login(request, user)
+#                     return redirect('home')  # Redirect to a success page.
+#                 else:
+#                     messages.warning(request, 'Your account is not yet approved by an admin.')
+#             except Member.DoesNotExist:
+#                 messages.error(request, 'Invalid email or password.')
+
+#             # login(request, user)
+#             # return redirect('home')  # Redirect to a success page.
+#         else:
+#             messages.error(request, 'Invalid email or password.')
+#     return render(request, 'registration/login.html')
+
 def login_view(request):
     if request.method == 'POST':
-        email = request.POST['email']
-        password = request.POST['password']
+        email = request.POST.get('email')
+        password = request.POST.get('password')
+        
+        if not email or not password:
+            messages.error(request, 'Email and password are required.')
+            return render(request, 'registration/login.html')
+        
         user = authenticate(request, username=email, password=password)
         print(user)
         if user is not None:
-            try:
+            if hasattr(user, 'member'):
+                # Handle member-specific logic
                 if user.member.is_approved:
                     login(request, user)
                     return redirect('home')  # Redirect to a success page.
                 else:
-                    messages.warning(request, 'Your account is not yet approved by an admin.')
-            except Member.DoesNotExist:
-                messages.error(request, 'Invalid email or password2.')
-
-            # login(request, user)
-            # return redirect('home')  # Redirect to a success page.
+                    messages.warning(request, 'Your member account is not yet approved by an admin.')
+            elif hasattr(user, 'employee'):
+                # Handle employee-specific logic
+                login(request, user)
+                return redirect('home')  # Redirect to a success page.
+            else:
+                messages.error(request, 'Your account is not associated with any member or employee profile.')
         else:
-            messages.error(request, 'Invalid email or password1.')
+            messages.error(request, 'Invalid email or password.')
+    
     return render(request, 'registration/login.html')
 
 @login_required
@@ -172,21 +174,7 @@ def download_book(request, book_id):
 
 # ================ Dashboard ================
 # Book management 
-
-# def book_create(request):
-#     if request.method == 'POST':
-#         form = BookForm(request.POST, request.FILES)
-#         if form.is_valid():
-#             book = form.save()
-#             messages.success(request, 'Book created successfully!')
-#             return redirect('book_create')
-#         else:
-#             messages.error(request, 'Error creating book. Please check the form.')
-#     else:
-#         form = BookForm()
-
-#     return render(request, 'admin/book/book_create.html', {'form': form})
-
+@staff_member_required
 def book_create(request):
     if request.method == 'POST':
         form = BookForm(request.POST, request.FILES)
@@ -205,8 +193,7 @@ def book_create(request):
 
     return render(request, 'admin/book/book_create.html', {'form': form})
 
-
-
+@staff_member_required
 def book_edit(request, pk):
     book = get_object_or_404(Book, pk=pk)
     try:
@@ -240,19 +227,18 @@ def book_edit(request, pk):
 
     return render(request, 'admin/book/book_edit.html', {'form': form, 'book': book})
 
+@staff_member_required
 def book_delete(request, pk):
     book = get_object_or_404(Book, pk=pk)
     book.delete() 
     messages.success(request, 'Book deleted successfully!')
     return redirect(reverse('book_list'))
 
+@staff_member_required
 def book_list(request):
     books = Book.objects.all().order_by('-id')
     return render(request, 'admin/book/book_list.html', {'books': books})
 
-# def book_detail(request, book_id):
-#     book = get_object_or_404(Book, pk=book_id)
-#     return render(request, 'admin/book/book_detail.html', {'book': book})
 
 # Employee management
 @staff_member_required
@@ -278,17 +264,23 @@ def admin_dashboard(request):
     
     return render(request, 'admin/dashboard.html', context)
 
-
 @staff_member_required
 def employee_create(request):
     if request.method == 'POST':
         form = EmployeeRegistrationForm(request.POST)
-        if form.is_valid():
-            user = form.save()
+        email = request.POST.get('email')
+        
+        if UserModel.objects.filter(email=email).exists():
+            messages.error(request, 'This email already exist.')
+        elif form.is_valid():
+            # user = form.save()
+            # login(request, user)
+            
+            user = form.save(commit=False)
             user.is_admin = True
             user.save()
             messages.success(request, 'Employee created successfully!')
-            return redirect('employee_create')
+            return redirect('employee_create')  # Redirect to a home page or any other page after registration
         else:
             messages.error(request, 'Error creating employee. Please check the form.')
     else:
@@ -342,7 +334,11 @@ def member_create(request):
 
     if request.method == 'POST':
         form = AdminMemberCreationForm(request.POST)
-        if form.is_valid():
+        email = request.POST.get('email')
+        
+        if UserModel.objects.filter(email=email).exists():
+            messages.error(request, 'This email already exist.')
+        elif form.is_valid():
             form.save()
             messages.success(request, 'Member added successfully!')
             return redirect('employee_create')  # Redirect to the member list page for admin
@@ -457,30 +453,3 @@ def category_edit(request, pk):
         messages.error(request, 'Error updating category. Please check the form.')
     return render(request, 'admin/category/category_edit.html', {'category': category})
 
-# Book management
-# @staff_member_required
-# def book_list(request):
-#     books = Book.objects.all()
-#     return render(request, 'admin/book_list.html', {'books': books})
-
-# def book_detail(request, pk):
-#     book = get_object_or_404(Book, pk=pk)
-#     return render(request, 'books/book_detail.html', {'book': book})
-
-# @staff_member_required
-# def book_delete(request, pk):
-#     book = get_object_or_404(Book, pk=pk)
-#     book.employee.delete()  # This will also delete the book due to the OneToOne relationship
-#     return redirect(reverse('book_list'))
-
-# @staff_member_required
-# def book_edit(request, pk):
-#     book = get_object_or_404(Book, pk=pk)
-#     if request.method == 'POST':
-#         form = BookForm(request.POST, instance=book)
-#         if form.is_valid():
-#             form.save()
-#             return redirect(reverse('book_list'))
-#     else:
-#         form = BookForm(instance=book)
-#     return render(request, 'admin/book_edit.html', {'form': form})

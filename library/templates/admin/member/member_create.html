@@ -65,12 +65,31 @@
             <!-- Display success and error messages -->
             {% if messages %}
             {% for message in messages %}
-                <div class="alert alert-{{ message.tags }} bg-{{ message.tags }} text-light border-0 alert-dismissible fade show" role="alert">
-                {{ message }}
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+                {% if message.tags == "error" %}
+                  <div class="alert alert-danger bg-danger text-light border-0 alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    {% comment %} {{ message.tags }} {% endcomment %}
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+                  </div>
+                {% endif %}
+
+                {% if message.tags == "warning" %}
+                <div class="alert alert-warning bg-warning text-light border-0 alert-dismissible fade show" role="alert">
+                  {{ message }}
+                  {% comment %} {{ message.tags }} {% endcomment %}
+                  <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
+                {% endif %}
+
+                {% if message.tags == "success" %}
+                <div class="alert alert-success bg-success text-light border-0 alert-dismissible fade show" role="alert">
+                  {{ message }}
+                  {% comment %} {{ message.tags }} {% endcomment %}
+                  <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                {% endif %}
             {% endfor %}
-            {% endif %} 
+            {% endif %}
 
             <!-- Content Row -->
             <section class="section">

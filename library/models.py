@@ -4,8 +4,8 @@ from users.models import UserModel
 
 class Employee(models.Model):
     POSITION_CHOICES = [
-        ("DIRECTOR", "Director"),
         ("GENERAL", "General"),
+        ("DIRECTOR", "Director"),
     ]
     user = models.OneToOneField(UserModel, on_delete=models.CASCADE)
     position = models.CharField(max_length=100, choices=POSITION_CHOICES, default="GENERAL")
@@ -16,9 +16,6 @@ class Employee(models.Model):
         max_length=15,
         validators=[RegexValidator(r'^\+?1?\d{9,15}$', message="Phone number must be entered in the format: '+999999999'. Up to 15 digits allowed.")]
     )
-
-    class Meta:
-        unique_together = ('first_name', 'last_name')
 
     def __str__(self):
         return self.user.email

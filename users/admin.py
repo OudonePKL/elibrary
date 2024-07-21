@@ -4,7 +4,7 @@ from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.forms import ReadOnlyPasswordHashField
 from django.core.exceptions import ValidationError
 
-from .models import UserModel, CheckEmail
+from .models import UserModel
 
 admin.site.site_header = "E-Library admin page"
 admin.site.index_title = ""
@@ -70,10 +70,6 @@ class UserAdmin(BaseUserAdmin):
             },
         ),
         (
-            "information",
-            {"fields": [ "profile_image"]},
-        ),
-        (
             "situation",
             {
                 "fields": [
@@ -107,11 +103,4 @@ class UserAdmin(BaseUserAdmin):
             return ("join_date",)
 
 
-class CheckEmailAdmin(admin.ModelAdmin):
-    ordering = ("id",)
-    list_display_links = ("id",)
-    list_display = ("id", "email", "code", "created_at", "expires_at")
-
-
 admin.site.register(UserModel, UserAdmin)
-admin.site.register(CheckEmail, CheckEmailAdmin)
