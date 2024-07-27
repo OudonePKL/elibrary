@@ -5,6 +5,7 @@ from users.models import UserModel
 from .models import Book, UploadBook, Member, Employee, Category
 from django.forms import inlineformset_factory
 from django.core.exceptions import ValidationError
+from django.core.validators import RegexValidator
 
 
 class CategoryForm(forms.ModelForm):
@@ -42,23 +43,6 @@ class UserRegistrationForm2(UserCreationForm):
                 phone=self.cleaned_data['phone']
             )
         return user
-
-# class MemberRegistrationForm(UserCreationForm):
-#     email = forms.EmailField(required=True)
-#     address = forms.CharField(required=False)
-#     phone = forms.CharField(required=False)
-
-#     class Meta:
-#         model = UserModel
-#         fields = ('email', 'password1', 'password2')
-
-#     def save(self, commit=True):
-#         user = super(MemberRegistrationForm, self).save(commit=False)
-#         user.email = self.cleaned_data['email']
-#         if commit:
-#             user.save()
-#             Member.objects.create(user=user, address=self.cleaned_data['address'], phone=self.cleaned_data['phone'])
-#         return user
 
 class AdminMemberCreationForm(UserCreationForm):
     email = forms.EmailField(required=True)
@@ -199,7 +183,15 @@ class AdminEmployeeCreationForm(UserCreationForm):
     first_name = forms.CharField(required=True)
     last_name = forms.CharField(required=True)
     date_of_birth = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}), required=True)
-    phone = forms.CharField(required=True)
+    phone = forms.CharField(
+        required=True,
+        validators=[
+            RegexValidator(
+                r'^\+?1?\d{9,15}$',
+                message="Phone number must be entered in the format: '+999999999'. Up to 15 digits allowed."
+            )
+        ]
+    )
     position = forms.ChoiceField(choices=Employee.POSITION_CHOICES, required=True)
 
     class Meta:
@@ -207,13 +199,14 @@ class AdminEmployeeCreationForm(UserCreationForm):
         fields = ('email', 'password1', 'password2')
 
     def save(self, commit=True):
-        user = super(AdminEmployeeCreationForm, self).save(commit=False)
+        user = super().save(commit=False)
         user.email = self.cleaned_data['email']
         user.is_active = True  # Automatically activate user
-        user.is_admin = True  # Automatically admin user
+        user.is_admin = True  # Automatically make user admin
+        
         if commit:
             user.save()
-            Member.objects.create(
+            Employee.objects.create(
                 user=user,
                 first_name=self.cleaned_data['first_name'],
                 last_name=self.cleaned_data['last_name'],

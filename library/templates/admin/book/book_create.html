@@ -39,7 +39,7 @@
           
           <div class="container-fluid">
             <div class="d-sm-flex align-items-center justify-content-between mb-4">
-              <h1 class="h3 mb-0 text-gray-800">Book Create</h1>
+              <h1 class="h3 mb-0 text-gray-800">ເພີ່ມຂໍ້ມູນປື້ມ</h1>
             </div>
             
             <!-- Display success and error messages -->
@@ -82,7 +82,7 @@
                             {% csrf_token %}
                             
                             <div class="row mb-3">
-                              <label for="id_title" class="col-sm-2 col-form-label">Title</label>
+                              <label for="id_title" class="col-sm-2 col-form-label">ຊື່ປື້ມ</label>
                               <div class="col-sm-10">
                                 <input
                                   type="text"
@@ -96,7 +96,7 @@
                             </div>
                           
                             <div class="row mb-3">
-                              <label for="id_author" class="col-sm-2 col-form-label">Author</label>
+                              <label for="id_author" class="col-sm-2 col-form-label">ຜູ້ຂຽນ</label>
                               <div class="col-sm-10">
                                 <input
                                   type="text"
@@ -124,7 +124,7 @@
                             </div>
                           
                             <div class="row mb-3">
-                              <label for="id_category" class="col-sm-2 col-form-label">Category</label>
+                              <label for="id_category" class="col-sm-2 col-form-label">ໝວດໝູ່</label>
                               <div class="col-sm-10">
                                 <select
                                   class="form-select"
@@ -139,24 +139,24 @@
                               </div>
                             </div>
                           
-                            <div class="row mb-3">
-                              <label for="id_employee" class="col-sm-2 col-form-label">Employee</label>
+                            <div class="row mb-3" hidden>
+                              <label for="id_employee" class="col-sm-2 col-form-label">ພະນັກງານ</label>
                               <div class="col-sm-10">
-                                <select
-                                  class="form-select"
+                                <input
+                                  type="text"
+                                  class="form-control"
                                   name="employee"
                                   id="id_employee"
+                                  value="{{ user.employee.id }}"
                                   required
+                                  readonly
                                 >
-                                  {% for value, name in form.employee.field.choices %}
-                                  <option value="{{ value }}" {% if form.employee.value == value %}selected{% endif %}>{{ name }}</option>
-                                  {% endfor %}
-                                </select>
+                                </input>
                               </div>
                             </div>
                           
                             <div class="row mb-3">
-                              <legend class="col-form-label col-sm-2 pt-0">Is public</legend>
+                              <legend class="col-form-label col-sm-2 pt-0">ສາທາລະນະ</legend>
                               <div class="col-sm-10">
                                 <div class="form-check">
                                   <input
@@ -171,7 +171,7 @@
                             </div>
                           
                             <div class="row mb-3">
-                              <label for="id_publication_date" class="col-sm-2 col-form-label">Publication date</label>
+                              <label for="id_publication_date" class="col-sm-2 col-form-label">ວັນທີພິມ</label>
                               <div class="col-sm-10">
                                 <input
                                   type="date"
@@ -185,7 +185,7 @@
                             </div>
                           
                             <div class="row mb-3">
-                              <label for="id_file" class="col-sm-2 col-form-label">Book file</label>
+                              <label for="id_file" class="col-sm-2 col-form-label">ໄຟລ໌ປື້ມ</label>
                               <div class="col-sm-10">
                                 <input
                                   type="file"
@@ -198,7 +198,7 @@
                             </div>
                           
                             <div class="row mb-3">
-                              <label for="id_cover" class="col-sm-2 col-form-label">Book cover</label>
+                              <label for="id_cover" class="col-sm-2 col-form-label">ຫນ້າ​ປົກ​ປຶ້ມ</label>
                               <div class="col-sm-10">
                                 <input
                                   type="file"
@@ -212,7 +212,7 @@
                             
                             <div class="row mb-3">
                               <div class="col-sm-10 offset-sm-2">
-                                <button type="submit" class="btn btn-primary">Submit Form</button>
+                                <button type="submit" class="btn btn-primary">ເພີ່ມຂໍ້ມູນ</button>
                               </div>
                             </div>
                           </form>

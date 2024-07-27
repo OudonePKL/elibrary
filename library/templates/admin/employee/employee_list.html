@@ -58,7 +58,7 @@
             <div
               class="d-sm-flex align-items-center justify-content-between mb-4"
             >
-              <h1 class="h3 mb-0 text-gray-800">Employee list</h1>
+              <h1 class="h3 mb-0 text-gray-800">ຂໍ້ມູນພະນັກງານ</h1>
             </div>
 
             <!-- Display success and error messages -->
@@ -77,7 +77,7 @@
                 <div class="card-body">
                   {% if user.is_authenticated and user.employee.position == "GENERAL" %}
                   <a href="{%url 'employee_create' %}" class="btn btn-success"
-                    >Add Employee</a
+                    >ເພີ່ມພະນັກງານ</a
                   >
                   {% endif %}
                   
@@ -86,13 +86,13 @@
                     <thead>
                       <tr>
                         <th>#</th>
-                        <th>First Name</th>
-                        <th>Last Name</th>
-                        <th>Position</th>
-                        <th>Email</th>
-                        <th>Phone</th>
+                        <th>ຊື່​ແທ້</th>
+                        <th>ນາມ​ສະ​ກຸນ</th>
+                        <th>ຕໍາແໜ່ງ</th>
+                        <th>ອີເມວ</th>
+                        <th>ເບີ​ໂທລະ​ສັບ</th>
                         {% if user.is_authenticated and user.employee.position == "GENERAL" %}
-                        <th scope="col">Actions</th>
+                        <th scope="col">ຈັດການ</th>
                         {% endif %}
                       </tr>
                     </thead>
@@ -110,13 +110,13 @@
                           <a
                             href="{% url 'employee_edit' employee.user.id %}"
                             class="btn btn-primary"
-                            >Edit</a
+                            >ແກ້ໄຂ</a
                           >
                           <a
                             href="{% url 'employee_delete' employee.id %}"
                             class="btn btn-danger"
-                            onclick="return confirm('Are you sure you want to delete this employee?');"
-                            >Delete</a
+                            onclick="return confirm('ທ່ານແນ່ໃຈບໍ່ວ່າຕ້ອງການລຶບພະນັກງານນີ້?');"
+                            >ລຶບ</a
                           >
                         </td>
                         {% endif %}

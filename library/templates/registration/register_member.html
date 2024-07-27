@@ -39,48 +39,67 @@
 <body>
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
         <div class="container-fluid">
-            <a class="navbar-brand" href="/">
-                <img src="{% static 'images/logo4.png' %}" alt="Logo" class="navbar-logo" />
-            </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                    <li class="nav-item">
-                        <a class="nav-link active" aria-current="page" href="/">Home</a>
-                    </li>
+          <a class="navbar-brand" href="/">
+            <img src="../../static/images/logo4.png" alt="Logo" class="navbar-logo" />
+          </a>
+          <button
+            class="navbar-toggler"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#navbarNav"
+            aria-controls="navbarNav"
+            aria-expanded="false"
+            aria-label="Toggle navigation"
+          >
+            <span class="navbar-toggler-icon"></span>
+          </button>
+          <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+              <li class="nav-item">
+                <a class="nav-link active" aria-current="page" href="/">ໜ້າຫຼັກ</a>
+              </li>
+            </ul>
+            <form class="d-flex" method="GET" action="{% url 'home' %}">
+              <input
+                class="form-control me-2"
+                type="search"
+                placeholder="ຄົ້ນຫາ"
+                aria-label="Search"
+                name="q"
+                value="{{ request.GET.q }}"
+              />
+              <button class="btn btn-outline-success" type="submit">
+                ຄົ້ນຫາ
+              </button>
+            </form>
+  
+  
+            {% if user.is_authenticated %}
+              <ul class="navbar-nav ms-3">
+                <li class="nav-item">
+                  <form method="post" action="{% url 'logout' %}" style="display:inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="nav-link btn btn-link" style="display:inline; padding:0;">ອອກຈາກລະບົບ</button>
+                  </form>
+                </li>
+              </ul>
+              {% if user.is_staff %}
+                <ul class="navbar-nav ms-3">
+                  <li class="nav-item">
+                    <a class="nav-link" href="{% url 'admin_dashboard' %}">ໜ້າຄວບຄຸມ</a>
+                  </li>
                 </ul>
-                <form class="d-flex" method="GET" action="{% url 'home' %}">
-                    <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search" name="q" value="{{ request.GET.q }}" />
-                    <button class="btn btn-outline-success" type="submit">Search</button>
-                </form>
-                {% if user.is_authenticated %}
-                    <ul class="navbar-nav ms-3">
-                        <li class="nav-item">
-                            <form method="post" action="{% url 'logout' %}" style="display:inline;">
-                                {% csrf_token %}
-                                <button type="submit" class="nav-link btn btn-link" style="display:inline; padding:0;">Logout</button>
-                            </form>
-                        </li>
-                    </ul>
-                    {% if user.is_staff %}
-                        <ul class="navbar-nav ms-3">
-                            <li class="nav-item">
-                                <a class="nav-link" href="{% url 'admin_dashboard' %}">Admin Dashboard</a>
-                            </li>
-                        </ul>
-                    {% endif %}
-                {% else %}
-                    <ul class="navbar-nav ms-3">
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'login' %}">Login</a>
-                        </li>
-                    </ul>
-                {% endif %}
-            </div>
+              {% endif %}
+            {% else %}
+              <ul class="navbar-nav ms-3">
+                <li class="nav-item">
+                  <a class="nav-link" href="/login">ເຂົ້າສູ່ລະບົບ</a>
+                </li>
+              </ul>
+            {% endif %}
+          </div>
         </div>
-    </nav>
+      </nav>
     <main>
         <div class="container">
             <section class="section register min-vh-100 d-flex flex-column align-items-center justify-content-center py-4">
@@ -96,8 +115,8 @@
                             <div class="card mb-3">
                                 <div class="card-body">
                                     <div class="pt-4 pb-2">
-                                        <h5 class="card-title text-center pb-0 fs-4">Create an Account</h5>
-                                        <p class="text-center small">Fill in the information below to register</p>
+                                        <h5 class="card-title text-center pb-0 fs-4">ສ້າງ​ບັນ​ຊີ</h5>
+                                        <p class="text-center small">ກະລຸນາຕື່ມຂໍ້ມູນໃສ່ຂ້າງລຸ່ມນີ້ເພື່ອລົງທະບຽນ</p>
                                     </div>
                                     <!-- Display success and error messages -->
                                     {% if messages %}
@@ -132,33 +151,36 @@
                                     <form method="post" action="{% url 'register_member' %}" class="row g-3 needs-validation" novalidate>
                                         {% csrf_token %}
                                         <div class="col-12">
-                                            <label for="yourEmail" class="form-label">Your Email</label>
+                                            <label for="yourEmail" class="form-label">ອີເມວ</label>
                                             <input type="email" name="email" class="form-control" id="yourEmail" required />
-                                            <div class="invalid-feedback">Please enter a valid Email address!</div>
+                                            <div class="invalid-feedback">ກະລຸນາໃສ່ທີ່ຢູ່ອີເມວທີ່ຖືກຕ້ອງ!</div>
                                         </div>
                                         <div class="col-12">
-                                            <label for="yourPassword" class="form-label">Password</label>
-                                            <input type="password" name="password1" class="form-control" id="yourPassword" required />
-                                            <div class="invalid-feedback">Please enter your password!</div>
-                                        </div>
-                                        <div class="col-12">
-                                            <label for="repeatPassword" class="form-label">Repeat Password</label>
-                                            <input type="password" name="password2" class="form-control" id="repeatPassword" required />
-                                            <div class="invalid-feedback">Please repeat your password!</div>
-                                        </div>
-                                        <div class="col-12">
-                                            <label for="yourAddress" class="form-label">Your Address</label>
+                                            <label for="yourAddress" class="form-label">ທີ່ຢູ່ປັດຈຸບັນ</label>
                                             <input type="text" name="address" class="form-control" id="yourAddress" />
+                                            <div class="invalid-feedback">ກະລຸນາໃສ່ທີ່ຢູ່ປັດຈຸບັນທີ່ຖືກຕ້ອງ!</div>
                                         </div>
                                         <div class="col-12">
-                                            <label for="yourPhone" class="form-label">Your Phone</label>
+                                            <label for="yourPhone" class="form-label">ເບີ​ໂທລະ​ສັບ</label>
                                             <input type="text" name="phone" class="form-control" id="yourPhone" />
+                                            <div class="invalid-feedback">ກະລຸນາໃສ່ເບີ​ໂທລະ​ສັບທີ່ຖືກຕ້ອງ!</div>
                                         </div>
                                         <div class="col-12">
-                                            <button class="btn btn-primary w-100" type="submit">Register</button>
+                                            <label for="yourPassword" class="form-label">ລະຫັດຜ່ານ</label>
+                                            <input type="password" name="password1" class="form-control" id="yourPassword" required />
+                                            <div class="invalid-feedback">ກະລຸນາໃສ່ລະຫັດຜ່ານຂອງທ່ານ!</div>
                                         </div>
                                         <div class="col-12">
-                                            <p class="small mb-0">Already have an account? <a href="{% url 'login' %}">Login</a></p>
+                                            <label for="repeatPassword" class="form-label">ຢືນຢັນລະຫັດຜ່ານ</label>
+                                            <input type="password" name="password2" class="form-control" id="repeatPassword" required />
+                                            <div class="invalid-feedback">ກະລຸນາຢືນຢັນລະຫັດຜ່ານຂອງທ່ານ!</div>
+                                        </div>
+                                        
+                                        <div class="col-12">
+                                            <button class="btn btn-primary w-100" type="submit">ລົງທະບຽນ</button>
+                                        </div>
+                                        <div class="col-12">
+                                            <p class="small mb-0">ມີບັນຊີຢູ່ແລ້ວບໍ? <a href="{% url 'login' %}">ເຂົ້າ​ສູ່​ລະ​ບົບ</a></p>
                                         </div>
                                     </form>
                                 </div>

@@ -15,8 +15,12 @@ from django.contrib import messages
 from django.http import HttpResponse
 from django.conf import settings
 import os
+from django.utils import timezone
+import logging
 
 from django.urls import reverse
+
+logger = logging.getLogger(__name__)
 
 def home(request):
     query = request.GET.get('q')
@@ -48,23 +52,22 @@ def book_detail(request, book_id):
     page_obj = paginator.get_page(page_number)
     return render(request, 'book_detail.html', {'book': book, 'uploads': uploads, 'page_obj': page_obj})
 
-
 def register_member(request):
     if request.method == 'POST':
         form = MemberRegistrationForm(request.POST)
         email = request.POST.get('email')
         
         if UserModel.objects.filter(email=email).exists():
-            messages.error(request, 'This email already exist.')
+            messages.error(request, 'ອີເມວນີ້ມີຢູ່ແລ້ວ.')
         elif form.is_valid():
             user = form.save(commit=False)
             user.is_active = True  
             user.save()
             Member.objects.create(user=user, address=form.cleaned_data['address'], phone=form.cleaned_data['phone'])
-            messages.success(request, 'Registration successful! Your account needs to be approved by an admin before you can log in.')
+            messages.success(request, 'ການລົງທະບຽນສຳເລັດແລ້ວ! ບັນຊີຂອງທ່ານຕ້ອງໄດ້ຮັບການອະນຸມັດຈາກຜູ້ເບິ່ງແຍງລະບົບກ່ອນທີ່ທ່ານຈະສາມາດເຂົ້າສູ່ລະບົບໄດ້.')
             return redirect('login')
         else:
-            messages.error(request, 'Error creating member. Please check the form.')
+            messages.error(request, 'ເກີດຄວາມຜິດພາດໃນການສະໝັກສະມາຊິກ. ກະລຸນາຕື່ມຂໍ້ມູນໃຫ້ຄົບ.')
     else:
         form = MemberRegistrationForm()
     
@@ -81,47 +84,13 @@ def register_employee(request):
         form = EmployeeRegistrationForm()
     return render(request, 'registration/register_employee.html', {'form': form})
 
-# def login_view(request):
-#     if request.method == 'POST':
-#         email = request.POST['email']
-#         password = request.POST['password']
-#         user = authenticate(request, username=email, password=password)
-#         if user is not None:
-#             login(request, user)
-#             return redirect('home')  # Redirect to a success page.
-#         else:
-#             messages.error(request, 'Invalid email or password.')
-#     return render(request, 'registration/login.html')
-
-# def login_view(request):
-#     if request.method == 'POST':
-#         email = request.POST['email']
-#         password = request.POST['password']
-#         user = authenticate(request, username=email, password=password)
-#         print(user)
-#         if user is not None:
-#             try:
-#                 if user.member.is_approved:
-#                     login(request, user)
-#                     return redirect('home')  # Redirect to a success page.
-#                 else:
-#                     messages.warning(request, 'Your account is not yet approved by an admin.')
-#             except Member.DoesNotExist:
-#                 messages.error(request, 'Invalid email or password.')
-
-#             # login(request, user)
-#             # return redirect('home')  # Redirect to a success page.
-#         else:
-#             messages.error(request, 'Invalid email or password.')
-#     return render(request, 'registration/login.html')
-
 def login_view(request):
     if request.method == 'POST':
         email = request.POST.get('email')
         password = request.POST.get('password')
         
         if not email or not password:
-            messages.error(request, 'Email and password are required.')
+            messages.error(request, 'ຕ້ອງການອີເມລ໌ ແລະລະຫັດຜ່ານ.')
             return render(request, 'registration/login.html')
         
         user = authenticate(request, username=email, password=password)
@@ -133,30 +102,27 @@ def login_view(request):
                     login(request, user)
                     return redirect('home')  # Redirect to a success page.
                 else:
-                    messages.warning(request, 'Your member account is not yet approved by an admin.')
+                    messages.warning(request, 'ບັນຊີສະມາຊິກຂອງທ່ານຍັງບໍ່ທັນໄດ້ຮັບການອະນຸມັດຈາກຜູ້ເບິ່ງແຍງລະບົບເທື່ອ.')
             elif hasattr(user, 'employee'):
-                # Handle employee-specific logic
                 login(request, user)
                 return redirect('home')  # Redirect to a success page.
             else:
-                messages.error(request, 'Your account is not associated with any member or employee profile.')
+                messages.error(request, 'ບັນຊີຂອງທ່ານບໍ່ໄດ້ເຊື່ອມໂຍງກັບສະມາຊິກ ຫຼືໂປຣໄຟລ໌ພະນັກງານໃດໆ.')
         else:
-            messages.error(request, 'Invalid email or password.')
+            messages.error(request, 'ອີເມວ ຫຼື ລະຫັດຜ່ານບໍ່ຖືກຕ້ອງ.')
     
     return render(request, 'registration/login.html')
 
-@login_required
 def logout_view(request):
     logout(request)
     return redirect('login')
 
-@login_required
 def download_book(request, book_id):
     book = get_object_or_404(Book, id=book_id)
     upload = book.uploads.first()  # Adjust this query based on your logic
 
     if not upload or not upload.file:
-        return HttpResponse("File not found.", status=404)
+        return HttpResponse("ບໍ່ພົບໄຟລ໌.", status=404)
 
     # Log the download
     DownloadBook.objects.create(user=request.user, book=book)
@@ -169,7 +135,7 @@ def download_book(request, book_id):
             response['Content-Disposition'] = f'attachment; filename="{book.title}.pdf"'
             return response
     else:
-        return HttpResponse("File not found.", status=404)
+        return HttpResponse("ບໍ່ພົບໄຟລ໌.", status=404)
     
 
 # ================ Dashboard ================
@@ -184,10 +150,10 @@ def book_create(request):
             cover = form.cleaned_data['cover']
             if file or cover:
                 UploadBook.objects.create(book=book, file=file, cover=cover)
-            messages.success(request, 'Book created successfully!')
+            messages.success(request, 'ເພີ່ມຂໍ້ມູນປຶ້ມສຳເລັດແລ້ວ!')
             return redirect('book_create')
         else:
-            messages.error(request, 'Error creating book. Please check the form.')
+            messages.error(request, 'ເກີດຄວາມຜິດພາດໃນການເພີ່ມຂໍ້ມູນປຶ້ມ. ກະລຸນາຕື່ມຂໍ້ມູນໃຫ້ຄົບ.')
     else:
         form = BookForm()
 
@@ -216,10 +182,10 @@ def book_edit(request, pk):
             else:
                 if file or cover:
                     UploadBook.objects.create(book=book, file=file, cover=cover)
-            messages.success(request, 'Book updated successfully!')
+            messages.success(request, 'ແກ້ໄຂຂໍ້ມູນປຶ້ມສຳເລັດແລ້ວ!')
             return redirect('book_list')
         else:
-            messages.error(request, 'Error updating book. Please check the form.')
+            messages.error(request, 'ເກີດຄວາມຜິດພາດໃນການແກ້ໄຂຂໍ້ມູນປຶ້ມ. ກະລຸນາຕື່ມຂໍ້ມູນໃຫ້ຄົບ.')
     else:
         form = BookForm(instance=book)
         if book.publication_date:
@@ -231,7 +197,7 @@ def book_edit(request, pk):
 def book_delete(request, pk):
     book = get_object_or_404(Book, pk=pk)
     book.delete() 
-    messages.success(request, 'Book deleted successfully!')
+    messages.success(request, 'ລຶບຂໍ້ມູນປຶ້ມສຳເລັດແລ້ວ!')
     return redirect(reverse('book_list'))
 
 @staff_member_required
@@ -267,24 +233,22 @@ def admin_dashboard(request):
 @staff_member_required
 def employee_create(request):
     if request.method == 'POST':
-        form = EmployeeRegistrationForm(request.POST)
+        form = AdminEmployeeCreationForm(request.POST)
         email = request.POST.get('email')
-        
         if UserModel.objects.filter(email=email).exists():
-            messages.error(request, 'This email already exist.')
+            messages.error(request, 'ອີເມວນີ້ມີຢູ່ແລ້ວ.')
         elif form.is_valid():
-            # user = form.save()
-            # login(request, user)
-            
-            user = form.save(commit=False)
-            user.is_admin = True
-            user.save()
-            messages.success(request, 'Employee created successfully!')
-            return redirect('employee_create')  # Redirect to a home page or any other page after registration
+            try:
+                user = form.save()
+                messages.success(request, 'ເພີ່ມຂໍ້ມູນພະນັກງານສຳເລັດແລ້ວ!')
+                return redirect('employee_list')  # Redirect to the employee list or detail page
+            except Exception as e:
+                messages.error(request, f'ເກີດຄວາມຜິດພາດໃນການເພີ່ມຂໍ້ມູນພະນັກງານ: {e}')
         else:
-            messages.error(request, 'Error creating employee. Please check the form.')
+            messages.error(request, 'ເກີດຄວາມຜິດພາດໃນການເພີ່ມຂໍ້ມູນພະນັກງານ. ກະລຸນາຕື່ມຂໍ້ມູນໃຫ້ຄົບ.')
     else:
-        form = EmployeeRegistrationForm()
+        form = AdminEmployeeCreationForm()
+    
     return render(request, 'admin/employee/employee_create.html', {'form': form})
 
 @staff_member_required
@@ -296,7 +260,7 @@ def employee_list(request):
 def employee_delete(request, pk):
     employee = get_object_or_404(Employee, pk=pk)
     employee.user.delete()  # This will also delete the employee due to the OneToOne relationship
-    messages.success(request, 'Employee deleted successfully!')
+    messages.success(request, 'ລຶບຂໍ້ມູນພະນັກງານສຳເລັດແລ້ວ!')
     return redirect(reverse('employee_list'))
 
 @staff_member_required
@@ -309,11 +273,11 @@ def employee_edit(request, pk):
         form = EmployeeEditForm(request.POST, instance=user)
         if form.is_valid():
             form.save()
-            messages.success(request, 'Employee updated successfully!')
+            messages.success(request, 'ແກ້ໄຂຂໍ້ມູນພະນັກງານສຳເລັດແລ້ວ!')
             return redirect('employee_list')
             # return redirect('employee_edit', pk=user.pk)
         else:
-            messages.error(request, 'Error updating employee. Please check the form.')
+            messages.error(request, 'ເກີດຄວາມຜິດພາດໃນການແກ້ໄຂຂໍ້ມູນພະນັກງານ. ກະລຸນາຕື່ມຂໍ້ມູນໃຫ້ຄົບ.')
     else:
         form = EmployeeEditForm(instance=user)
         if employee.date_of_birth:
@@ -337,13 +301,13 @@ def member_create(request):
         email = request.POST.get('email')
         
         if UserModel.objects.filter(email=email).exists():
-            messages.error(request, 'This email already exist.')
+            messages.error(request, 'ອີເມວນີ້ມີຢູ່ແລ້ວ.')
         elif form.is_valid():
             form.save()
-            messages.success(request, 'Member added successfully!')
+            messages.success(request, 'ເພີ່ມຂໍ້ມູນສະມາຊິກສຳເລັດແລ້ວ!')
             return redirect('employee_create')  # Redirect to the member list page for admin
         else:
-            messages.error(request, 'Error adding member. Please check the form.')
+            messages.error(request, 'ເກີດຄວາມຜິດພາດໃນການເພີ່ມຂໍ້ມູນສະມາຊິກ. ກະລຸນາຕື່ມຂໍ້ມູນໃຫ້ຄົບ.')
     else:
         form = AdminMemberCreationForm()
     
@@ -353,7 +317,7 @@ def member_create(request):
 def member_delete(request, pk):
     member = get_object_or_404(Member, pk=pk)
     member.user.delete()  # This will also delete the member due to the OneToOne relationship
-    messages.success(request, 'Member deleted successfully!')
+    messages.success(request, 'ລຶບຂໍ້ມູນສະມາຊິກສຳເລັດແລ້ວ!')
     return redirect(reverse('member_list'))
 
 @staff_member_required
@@ -365,11 +329,10 @@ def member_edit(request, pk):
         form = MemberEditForm(request.POST, instance=user)
         if form.is_valid():
             form.save()
-            messages.success(request, 'Member updated successfully!')
+            messages.success(request, 'ແກ້ໄຂຂໍ້ມູນສະມາຊິກສຳເລັດແລ້ວ!')
             return redirect('member_list')
-            # return redirect('member_edit', pk=user.pk)
         else:
-            messages.error(request, 'Error updating member. Please check the form.')
+            messages.error(request, 'ເກີດຄວາມຜິດພາດໃນການແກ້ໄຂຂໍ້ມູນສະມາຊິກ. ກະລຸນາຕື່ມຂໍ້ມູນໃຫ້ຄົບ.')
     else:
         form = MemberEditForm(instance=user)
     return render(request, 'admin/member/member_edit.html', {'form': form})
@@ -381,7 +344,7 @@ def approve_member(request, member_id):
     member.user.is_active = True  # Make the user active
     member.user.save()
     member.save()
-    messages.success(request, f'{member.user.email} has been approved.')
+    messages.success(request, f'{member.user.email} ໄດ້ຮັບການອະນຸມັດ.')
     return redirect('member_list')
 
 @staff_member_required
@@ -391,7 +354,7 @@ def reject_member(request, member_id):
     member.user.is_active = False  # Make the user inactive
     member.user.save()
     member.save()
-    messages.success(request, f'{member.user.email} has been rejected.')
+    messages.success(request, f'{member.user.email} ໄດ້ຖືກປະຕິເສດ.')
     return redirect('member_list')
 
 
@@ -411,10 +374,10 @@ def category_create(request):
         form = CategoryForm(request.POST)
         if form.is_valid():
             form.save()
-            messages.success(request, 'Category created successfully!')
+            messages.success(request, 'ເພີ່ມຂໍ້ມູນໝວດໝູ່ສຳເລັດແລ້ວ!')
             return redirect('category_create')  
         else:
-            messages.error(request, 'Error creating category. Please check the form.')
+            messages.error(request, 'ເກີດຄວາມຜິດພາດໃນການເພີ່ມຂໍ້ມູນໝວດໝູ່. ກະລຸນາຕື່ມຂໍ້ມູນໃຫ້ຄົບ.')
     else:
         form = CategoryForm()
     return render(request, 'admin/category/category_create.html', {'form': form})
@@ -423,31 +386,17 @@ def category_create(request):
 def category_delete(request, pk):
     category = get_object_or_404(Category, pk=pk)
     category.delete()  
-    messages.success(request, 'Category deleted successfully!')
+    messages.success(request, 'ລຶບຂໍ້ມູນໝວດໝູ່ສຳເລັດແລ້ວ!')
     return redirect(reverse('category_list'))
 
 @staff_member_required
-def category_edit2(request, pk):
-    category = get_object_or_404(Category, pk=pk)
-    if request.method == 'POST':
-        form = CategoryForm(request.POST, instance=category)
-        if form.is_valid():
-            form.save()
-            messages.success(request, 'Category updated successfully!')
-            return redirect(reverse('category_list'))
-        else:
-            messages.error(request, 'Error updating category. Please check the form.')
-    else:
-        form = CategoryForm(instance=category)
-    return render(request, 'admin/category/category_create.html', {'form': form})
-
 def category_edit(request, pk):
     category = get_object_or_404(Category, pk=pk)
     
     if request.method == 'POST':
         category.name = request.POST.get('name')
         category.save()
-        messages.success(request, 'Category updated successfully!')
+        messages.success(request, 'ແກ້ໄຊຂໍ້ມູນໝວດໝູ່ສຳເລັດແລ້ວ!')
         return redirect(reverse('category_list'))
     else:
         messages.error(request, 'Error updating category. Please check the form.')

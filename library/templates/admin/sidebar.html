@@ -22,7 +22,7 @@
         <li class="nav-item active">
           <a class="nav-link" href="{% url 'admin_dashboard' %}">
             <i class="fas fa-fw fa-tachometer-alt"></i>
-            <span>Dashboard</span></a
+            <span>ໜ້າຄວບຄຸມ</span></a
           >
         </li>
 
@@ -30,19 +30,19 @@
         <hr class="sidebar-divider" />
 
         <!-- Heading -->
-        <div class="sidebar-heading">User managements</div>
+        <div class="sidebar-heading">ຈັດການຜູ້ໃຊ້</div>
 
         <li class="nav-item">
           <a class="nav-link" href="{% url "employee_list" %}">
             <i class="fas fa-users fa-chart-area"></i>
-            <span>Employees</span></a
+            <span>ພະນັກງານ</span></a
           >
         </li>
 
         <li class="nav-item">
           <a class="nav-link" href="{% url "member_list" %}">
             <i class="fas fa-user fa-table"></i>
-            <span>Members</span></a
+            <span>ສະມາຊິກ</span></a
           >
         </li>
 
@@ -50,13 +50,13 @@
         <hr class="sidebar-divider" />
 
         <!-- Heading -->
-        <div class="sidebar-heading">Books managements</div>
+        <div class="sidebar-heading">ຈັດການປຶ້ມ</div>
 
         <!-- Nav Item - Charts -->
         <li class="nav-item">
           <a class="nav-link" href="{% url "category_list" %}">
             <i class="fas fa-box"></i>
-            <span>Categories</span></a
+            <span>ໝວດໝູ່</span></a
           >
         </li>
 
@@ -64,7 +64,7 @@
         <li class="nav-item">
           <a class="nav-link" href="{% url 'book_list' %}">
             <i class="fas fa-book"></i>
-            <span>Books</span></a
+            <span>ປຶ້ມ</span></a
           >
         </li>
         
@@ -76,7 +76,7 @@
           <form method="post" action="{% url 'logout' %}" style="display:inline;">
             {% csrf_token %}
             <button type="submit" class="nav-link btn btn-link" style="display:inline; padding:2;">
-              <span>Logout</span>
+              <span>ອອກ​ຈາກ​ລະ​ບົບ</span>
             </button>
             {% comment %} <a class="nav-link" href="{{logout}}">
               <i class="fas fa-key"></i>
