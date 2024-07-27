@@ -22,19 +22,45 @@ from django.urls import reverse
 
 logger = logging.getLogger(__name__)
 
+# def home(request):
+#     query = request.GET.get('q')
+#     if query:
+#         books = Book.objects.filter(Q(title__icontains=query) | Q(author__icontains=query))
+#     else:
+#         books = Book.objects.all().prefetch_related('uploads')
+
+#     # Pagination
+#     paginator = Paginator(books, 10)  # Show 10 books per page
+#     page_number = request.GET.get('page')
+#     page_obj = paginator.get_page(page_number)
+    
+#     return render(request, 'home.html', {'page_obj': page_obj})
+
 def home(request):
     query = request.GET.get('q')
+    category_id = request.GET.get('category')
+    
+    books = Book.objects.all().prefetch_related('uploads')
+
     if query:
-        books = Book.objects.filter(Q(title__icontains=query) | Q(author__icontains=query))
-    else:
-        books = Book.objects.all().prefetch_related('uploads')
+        books = books.filter(Q(title__icontains=query) | Q(author__icontains=query))
+    
+    if category_id:
+        books = books.filter(category_id=category_id)
 
     # Pagination
-    paginator = Paginator(books, 10)  # Show 10 books per page
+    paginator = Paginator(books, 2)  # Show 10 books per page
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
     
-    return render(request, 'home.html', {'page_obj': page_obj})
+    categories = Category.objects.all()
+
+    return render(request, 'home.html', {
+        'page_obj': page_obj,
+        'query': query,
+        'categories': categories,
+        'selected_category': int(category_id) if category_id else None
+    })
 
 def book_detail(request, book_id):
     query = request.GET.get('q')
@@ -90,7 +116,7 @@ def login_view(request):
         password = request.POST.get('password')
         
         if not email or not password:
-            messages.error(request, 'ຕ້ອງການອີເມລ໌ ແລະລະຫັດຜ່ານ.')
+            messages.error(request, 'ອີເມວ ຫຼື ລະຫັດຜ່ານບໍ່ຖືກຕ້ອງ.')
             return render(request, 'registration/login.html')
         
         user = authenticate(request, username=email, password=password)
