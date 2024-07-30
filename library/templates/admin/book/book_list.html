@@ -77,7 +77,7 @@
             <section class="section">
               <div class="card">
                 <div class="card-body">
-                  {% if user.is_authenticated and user.employee.position == "GENERAL" %}
+                  {% if user.is_authenticated and user.employee.position == "ທົ່ວໄປ" %}
                     <a href="{%url 'book_create' %}" class="btn btn-success">ເພີ່ມຂໍ້ມູນປື້ມ</a>
                   {% endif %}
                   
@@ -92,8 +92,8 @@
                         <th scope="col">ໝວດໝູ່</th>
                         <th scope="col">ພະນັກງານ</th>
                         <th scope="col">ສາທາລະນະ</th>
-                        <th scope="col">ISPN</th>
-                        {% if user.is_authenticated and user.employee.position == "GENERAL" %}
+                        <th scope="col">ISBN</th>
+                        {% if user.is_authenticated and user.employee.position == "ທົ່ວໄປ" %}
                         <th scope="col">ຈັດການ</th>
                         {% endif %}
                         
@@ -111,8 +111,8 @@
                         <td>{{ book.category }}</td>
                         <td>{{ book.employee }}</td>
                         <td>{{ book.is_public }}</td>
-                        <td>{{ book.ispn }}</td>
-                        {% if user.is_authenticated and user.employee.position == "GENERAL" %}
+                        <td>{{ book.isbn }}</td>
+                        {% if user.is_authenticated and user.employee.position == "ທົ່ວໄປ" %}
                         <td>
                           <a href="{% url 'book_edit' book.pk %}" class="btn btn-primary">ແກ້ໄຂ</a>
                           <a href="{% url 'book_delete' book.pk %}" class="btn btn-danger" onclick="return confirm('ທ່ານແນ່ໃຈບໍ່ວ່າຕ້ອງການລຶບປຶ້ມນີ້ອອກ?');">ລຶບ</a>

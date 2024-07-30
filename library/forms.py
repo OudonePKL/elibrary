@@ -279,7 +279,7 @@ class BookForm(forms.ModelForm):
 
     class Meta:
         model = Book
-        fields = ['title', 'author', 'ispn', 'category', 'employee', 'is_public', 'publication_date']
+        fields = ['title', 'author', 'isbn', 'category', 'employee', 'is_public', 'publication_date']
 
 class UploadBookForm(forms.ModelForm):
     class Meta:

@@ -68,7 +68,7 @@
                     <section class="section">
                         <div class="card">
                             <div class="card-body">
-                                {% if user.is_authenticated and user.employee.position == "GENERAL" %}
+                                {% if user.is_authenticated and user.employee.position == "ທົ່ວໄປ" %}
                                 <a href="{%url 'member_create' %}" class="btn btn-success"
                                     >ເພີ່ມສະມາຊິກ</a
                                 >
@@ -82,7 +82,7 @@
                                             <th>ອີເມວ</th>
                                             <th>ທີ່ຢູ່ປັດຈຸບັນ</th>
                                             <th>ເບີ​ໂທລະ​ສັບ</th>
-                                            {% if user.is_authenticated and user.employee.position == "GENERAL" %}
+                                            {% if user.is_authenticated and user.employee.position == "ທົ່ວໄປ" %}
                                             <th scope="col">ຈັດການ</th>
                                             {% endif %}
                                         </tr>
@@ -94,7 +94,7 @@
                                                 <td>{{ member.user.email }}</td>
                                                 <td>{{ member.address }}</td>
                                                 <td>{{ member.phone }}</td>
-                                                {% if user.is_authenticated and user.employee.position == "GENERAL" %}
+                                                {% if user.is_authenticated and user.employee.position == "ທົ່ວໄປ" %}
                                                 <td>
                                                     {% if not member.is_approved %}
                                                         <a href="{% url 'approve_member' member.id %}" class="btn btn-success">ອະນຸມັດ</a>

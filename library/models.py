@@ -4,13 +4,13 @@ from users.models import UserModel
 
 class Employee(models.Model):
     POSITION_CHOICES = [
-        ("GENERAL", "General"),
-        ("DIRECTOR", "Director"),
+        ("ທົ່ວໄປ", "ທົ່ວໄປ"),
+        ("ຜູ້ອໍານວຍການ", "ຜູ້ອໍານວຍການ"),
     ]
     user = models.OneToOneField(UserModel, on_delete=models.CASCADE)
-    position = models.CharField(max_length=100, choices=POSITION_CHOICES, default="GENERAL")
-    first_name = models.CharField(max_length=100)
-    last_name = models.CharField(max_length=100)
+    position = models.CharField(max_length=30, choices=POSITION_CHOICES, default="ທົ່ວໄປ")
+    first_name = models.CharField(max_length=30)
+    last_name = models.CharField(max_length=30)
     date_of_birth = models.DateField()
     phone = models.CharField(
         max_length=15,
@@ -47,7 +47,7 @@ class Book(models.Model):
     employee = models.ForeignKey(Employee, on_delete=models.CASCADE, related_name='books')
     is_public = models.BooleanField(default=True)
     publication_date = models.DateField(null=True, blank=True)
-    ispn = models.CharField(max_length=200)
+    isbn = models.CharField(max_length=200)
 
     def __str__(self):
         return self.title
