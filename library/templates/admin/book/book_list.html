@@ -77,9 +77,38 @@
             <section class="section">
               <div class="card">
                 <div class="card-body">
-                  {% if user.is_authenticated and user.employee.position == "ທົ່ວໄປ" %}
-                    <a href="{%url 'book_create' %}" class="btn btn-success">ເພີ່ມຂໍ້ມູນປື້ມ</a>
-                  {% endif %}
+
+                  
+                  
+
+                  <div class="d-flex justify-content-between align-items-center mb-4">
+                    {% comment %} <h2 class="fw-bolder">ປຶ້ມທັງໝົດ</h2> {% endcomment %}
+                      {% if user.is_authenticated and user.employee.position == "ທົ່ວໄປ" %}
+                        <a href="{%url 'book_create' %}" class="btn btn-success">ເພີ່ມຂໍ້ມູນປື້ມ</a>
+                      {% endif %}
+
+                      <h4 class="col-sm-2 col-form">ປຶ້ມທັງໝົດ: {{ book_count }}</h4>
+
+                      <form method="get" id="categoryForm" class="d-flex">
+                          <select name="category" class="form-select me-1" onchange="document.getElementById('categoryForm').submit();">
+                              <option value="">ໝວດໝູ່ທັງໝົດ</option>
+                              {% for category in categories %}
+                                  <option value="{{ category.id }}" {% if category.id|stringformat:"s" == category_id %}selected{% endif %}>
+                                      {{ category.name }}
+                                  </option>
+                              {% endfor %}
+                          </select>
+                      
+                          <select name="is_public" class="form-select me-2" onchange="document.getElementById('categoryForm').submit();">
+                              <option value="">ທັງໝົດ</option>
+                              <option value="true" {% if is_public == 'true' %}selected{% endif %}>ສາທາລະນະ</option>
+                              <option value="false" {% if is_public == 'false' %}selected{% endif %}>ບໍ່ແມ່ນສາທາລະນະ</option>
+                          </select>
+                      
+                          {% comment %} <button type="submit">Filter</button> {% endcomment %}
+                      </form>
+                      
+                  </div>
                   
                   <!-- Default Table -->
                   <table class="table">

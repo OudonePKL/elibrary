@@ -226,10 +226,28 @@ def book_delete(request, pk):
     messages.success(request, 'ລຶບຂໍ້ມູນປຶ້ມສຳເລັດແລ້ວ!')
     return redirect(reverse('book_list'))
 
+# @staff_member_required
+# def book_list(request):
+#     books = Book.objects.all().order_by('-id')
+#     return render(request, 'admin/book/book_list.html', {'books': books})
+
 @staff_member_required
 def book_list(request):
+    category_id = request.GET.get('category')
+    is_public = request.GET.get('is_public')
+
     books = Book.objects.all().order_by('-id')
-    return render(request, 'admin/book/book_list.html', {'books': books})
+
+    if category_id:
+        books = books.filter(category_id=category_id)
+
+    if is_public:
+        books = books.filter(is_public=(is_public.lower() == 'true'))
+
+    book_count = books.count()
+    categories = Category.objects.all()
+
+    return render(request, 'admin/book/book_list.html', {'books': books, 'categories': categories, 'category_id': category_id, 'is_public': is_public, 'book_count': book_count,})
 
 
 # Employee management
