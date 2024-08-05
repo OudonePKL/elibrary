@@ -170,7 +170,12 @@ def download_book(request, book_id):
 def book_create(request):
     if request.method == 'POST':
         form = BookForm(request.POST, request.FILES)
-        if form.is_valid():
+
+        # Check for the uniqueness of the book title
+        title = request.POST.get('title')
+        if Book.objects.filter(title=title).exists():
+            messages.error(request, 'ປື້ມນີ້ມີຢູ່ແລ້ວ, ກະລຸນາເພີ່ມປື້ມໄໝ່!')
+        elif form.is_valid():
             book = form.save()
             file = form.cleaned_data['file']
             cover = form.cleaned_data['cover']
