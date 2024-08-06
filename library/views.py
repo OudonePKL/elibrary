@@ -9,9 +9,12 @@ from users.models import UserModel
 
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.decorators import login_required
-from .forms import MemberRegistrationForm, MemberEditForm, EmployeeRegistrationForm, EmployeeEditForm, EmployeeForm, BookForm, UploadBookFormSet, MemberForm, CategoryForm, AdminMemberCreationForm, AdminEmployeeCreationForm
+from .forms import (MemberRegistrationForm, MemberEditForm, EmployeeRegistrationForm, EmployeeEditForm, 
+                    EmployeeForm, BookForm, UploadBookFormSet, MemberForm, CategoryForm, 
+                    AdminMemberCreationForm, AdminEmployeeCreationForm, EmailForm, OTPForm)
 from django.core.paginator import Paginator
 from django.contrib import messages
+from django.core.mail import EmailMessage
 from django.http import HttpResponse
 from django.conf import settings
 import os
@@ -22,19 +25,97 @@ from django.urls import reverse
 
 logger = logging.getLogger(__name__)
 
-# def home(request):
-#     query = request.GET.get('q')
-#     if query:
-#         books = Book.objects.filter(Q(title__icontains=query) | Q(author__icontains=query))
-#     else:
-#         books = Book.objects.all().prefetch_related('uploads')
+from django.core.mail import send_mail
+import random
+import string
+from datetime import timedelta
 
-#     # Pagination
-#     paginator = Paginator(books, 10)  # Show 10 books per page
-#     page_number = request.GET.get('page')
-#     page_obj = paginator.get_page(page_number)
+def send_otp_email(request):
+    if request.method == 'POST':
+        form = EmailForm(request.POST)
+        if form.is_valid():
+            
+            user_email = form.cleaned_data['email']
+            random_code = ''.join(random.choices(string.digits, k=6))
+            subject = "[SIRI] Membership verification code"
+            body = f"Email verification code: {random_code}"
+
+            print("############333 Hello")
+            print("Form=> ", form.cleaned_data['email'])
+            print("random_code=> ", random_code)
+
+            send_mail(subject, body, 'oudonephengkhamlar@gmail.com', [user_email])
+            
+            # Store OTP and expiration time in session
+            request.session['otp'] = random_code
+            request.session['otp_email'] = user_email
+            request.session['otp_expiry'] = (timezone.now() + timedelta(minutes=3)).timestamp()
+
+            messages.success(request, 'Your email has been sent. Please check your mailbox.')
+            return redirect('verify_otp')
+    else:
+        form = EmailForm()
+
+    return render(request, 'send_otp_email.html', {'form': form})
+
+
+def verify_otp2(request):
+    if request.method == 'POST':
+        form = OTPForm(request.POST)
+        if form.is_valid():
+            otp = form.cleaned_data['otp']
+            otp_email = request.session.get('otp_email')
+            otp_expiry = request.session.get('otp_expiry')
+            stored_otp = request.session.get('otp')
+            
+            if not otp_email or not otp_expiry or not stored_otp:
+                messages.error(request, 'No verification code was sent to that email.')
+            elif timezone.now().timestamp() > otp_expiry:
+                messages.error(request, 'The verification code has expired.')
+            elif otp != stored_otp:
+                messages.error(request, 'Invalid verification code.')
+            else:
+                messages.success(request, 'Email verification has been completed.')
+                # Clear the session data
+                del request.session['otp']
+                del request.session['otp_email']
+                del request.session['otp_expiry']
+                return redirect('login')
+    else:
+        form = OTPForm()
+
+    return render(request, 'verify_otp.html', {'form': form})
+
+def verify_otp(request):
+    if request.method == 'POST':
+        otp = request.POST.get('otp')
+        session_otp = request.session.get('otp')
+        otp_expiry = request.session.get('otp_expiry')
+        
+        if session_otp and otp_expiry and timezone.now().timestamp() < otp_expiry:
+            if otp == session_otp:
+                # OTP is correct, create the user
+                form_data = request.session.get('form_data')
+                form = MemberRegistrationForm(form_data)
+                if form.is_valid():
+                    user = form.save(commit=False)
+                    user.is_active = True
+                    user.save()
+                    Member.objects.create(
+                        user=user,
+                        address=form.cleaned_data['address'],
+                        phone=form.cleaned_data['phone']
+                    )
+                    messages.success(request, 'ການລົງທະບຽນສຳເລັດແລ້ວ! ບັນຊີຂອງທ່ານຕ້ອງໄດ້ຮັບການອະນຸມັດຈາກຜູ້ເບິ່ງແຍງລະບົບກ່ອນທີ່ທ່ານຈະສາມາດເຂົ້າສູ່ລະບົບໄດ້.')
+                    return redirect('login')
+            else:
+                messages.error(request, 'OTP ຜິດ. ກະລຸນາລອງໃໝ່.')
+        else:
+            messages.error(request, 'OTP ໝົດອາຍຸ. ກະລຸນາລົງທະບຽນໃໝ່.')
+            return redirect('register_member')
     
-#     return render(request, 'home.html', {'page_obj': page_obj})
+    return render(request, 'registration/verify_otp.html')
+
 
 def home(request):
     query = request.GET.get('q')
@@ -78,7 +159,7 @@ def book_detail(request, book_id):
     page_obj = paginator.get_page(page_number)
     return render(request, 'book_detail.html', {'book': book, 'uploads': uploads, 'page_obj': page_obj})
 
-def register_member(request):
+def register_member2(request):
     if request.method == 'POST':
         form = MemberRegistrationForm(request.POST)
         email = request.POST.get('email')
@@ -98,6 +179,36 @@ def register_member(request):
         form = MemberRegistrationForm()
     
     return render(request, 'registration/register_member.html', {'form': form})
+
+
+def register_member(request):
+    if request.method == 'POST':
+        form = MemberRegistrationForm(request.POST)
+        email = request.POST.get('email')
+        
+        if UserModel.objects.filter(email=email).exists():
+            messages.error(request, 'ອີເມວນີ້ມີຢູ່ແລ້ວ.')
+        elif form.is_valid():
+            # Generate and send OTP
+            otp = ''.join(random.choices(string.digits, k=6))
+            subject = "Email Verification OTP"
+            body = f"Your OTP for email verification is {otp}"
+            email_message = EmailMessage(subject, body, to=[email])
+            email_message.send()
+            
+            # Store form data and OTP in session
+            request.session['form_data'] = request.POST
+            request.session['otp'] = otp
+            request.session['otp_expiry'] = (timezone.now() + timezone.timedelta(minutes=5)).timestamp()
+            messages.success(request, 'ລະຫັດ OTP ໄດ້ຖືກສົ່ງໃປຫາອີເມວຂອງທ່ານແລ້ວ!')
+            return redirect('verify_otp')  # Redirect to OTP verification page
+        else:
+            messages.error(request, 'ເກີດຄວາມຜິດພາດໃນການສະໝັກສະມາຊິກ. ກະລຸນາຕື່ມຂໍ້ມູນໃຫ້ຄົບ.')
+    else:
+        form = MemberRegistrationForm()
+    
+    return render(request, 'registration/register_member.html', {'form': form})
+
 
 def register_employee(request):
     if request.method == 'POST':

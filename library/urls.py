@@ -4,6 +4,8 @@ from . import views
 from django.contrib.auth import views as auth_views
 
 urlpatterns = [
+    path('send-otp-email/', views.send_otp_email, name='send_otp_email'),
+    path('verify-otp/', views.verify_otp, name='verify_otp'),
     path('', views.home, name='home'),
     path('book/<int:book_id>/', views.book_detail, name='book_detail'),
     path('register_member/', views.register_member, name='register_member'),

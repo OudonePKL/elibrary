@@ -8,6 +8,12 @@ from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator
 
 
+class EmailForm(forms.Form):
+    email = forms.EmailField(label='Email')
+
+class OTPForm(forms.Form):
+    otp = forms.CharField(max_length=6, label='OTP')
+
 class CategoryForm(forms.ModelForm):
     class Meta:
         model = Category

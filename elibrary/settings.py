@@ -150,3 +150,19 @@ STATICFILES_DIRS = [os.path.join(BASE_DIR, "static")]
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
+
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'oudonephengkhamlar@gmail.com'
+EMAIL_HOST_PASSWORD = 'ogml rinw nhub kzdl'
+
+# EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"   
+# EMAIL_HOST = "smtp.gmail.com"
+# EMAIL_PORT = 587
+# EMAIL_HOST_USER = 'oudonephengkhamlar@gmail.com'
+# EMAIL_HOST_PASSWORD = 'ogml rinw nhub kzdl'
+# EMAIL_USE_TLS = True
+# DEFAULT_FROM_EMAIL = EMAIL_HOST_USER

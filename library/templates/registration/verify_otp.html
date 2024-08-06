@@ -101,8 +101,8 @@
                             <div class="card mb-3">
                                 <div class="card-body">
                                     <div class="pt-4 pb-2">
-                                        <h5 class="card-title text-center pb-0 fs-4">ສ້າງ​ບັນ​ຊີ</h5>
-                                        <p class="text-center small">ກະລຸນາຕື່ມຂໍ້ມູນໃສ່ຂ້າງລຸ່ມນີ້ເພື່ອລົງທະບຽນ</p>
+                                        <h5 class="card-title text-center pb-0 fs-4">ຢັ້ງຢືນ OTP</h5>
+                                        <p class="text-center small">ກະລຸນາໃສ່ລະຫັດ OTP ຂ້າງລຸ່ມນີ້ເພື່ອຢັ້ງຢືນບັນຊີຂອງທ່ານ.</p>
                                     </div>
                                     <!-- Display success and error messages -->
                                     {% if messages %}
@@ -127,38 +127,16 @@
                                         {% endif %}
                                     {% endfor %}
                                     {% endif %}
-                                    <form method="post" action="{% url 'register_member' %}" class="row g-3 needs-validation" novalidate>
+                                    <form method="post" action="{% url 'verify_otp' %}" class="row g-3 needs-validation" novalidate>
                                         {% csrf_token %}
                                         <div class="col-12">
-                                            <label for="yourEmail" class="form-label">ອີເມວ</label>
-                                            <input type="email" name="email" class="form-control" id="yourEmail" required />
-                                            <div class="invalid-feedback">ກະລຸນາໃສ່ທີ່ຢູ່ອີເມວທີ່ຖືກຕ້ອງ!</div>
+                                            <label for="otp" class="form-label">OTP</label>
+                                            <input type="text" name="otp" class="form-control" id="otp" required />
+                                            <div class="invalid-feedback">ກະລຸນາໃສ່ OTP!</div>
                                         </div>
+                                        
                                         <div class="col-12">
-                                            <label for="yourAddress" class="form-label">ທີ່ຢູ່ປັດຈຸບັນ</label>
-                                            <input type="text" name="address" class="form-control" id="yourAddress" />
-                                            <div class="invalid-feedback">ກະລຸນາໃສ່ທີ່ຢູ່ປັດຈຸບັນທີ່ຖືກຕ້ອງ!</div>
-                                        </div>
-                                        <div class="col-12">
-                                            <label for="yourPhone" class="form-label">ເບີ​ໂທລະ​ສັບ</label>
-                                            <input type="text" name="phone" class="form-control" id="yourPhone" />
-                                            <div class="invalid-feedback">ກະລຸນາໃສ່ເບີ​ໂທລະ​ສັບທີ່ຖືກຕ້ອງ!</div>
-                                        </div>
-                                        <div class="col-12">
-                                            <label for="yourPassword" class="form-label">ລະຫັດຜ່ານ</label>
-                                            <input type="password" name="password1" class="form-control" id="yourPassword" required />
-                                            <div class="invalid-feedback">ກະລຸນາໃສ່ລະຫັດຜ່ານຂອງທ່ານ!</div>
-                                        </div>
-                                        <div class="col-12">
-                                            <label for="repeatPassword" class="form-label">ຢືນຢັນລະຫັດຜ່ານ</label>
-                                            <input type="password" name="password2" class="form-control" id="repeatPassword" required />
-                                            <div class="invalid-feedback">ກະລຸນາຢືນຢັນລະຫັດຜ່ານຂອງທ່ານ!</div>
-                                        </div>
-                                        <div class="col-12">
-                                            <button class="btn btn-primary w-100" type="submit">ລົງທະບຽນ</button>
-                                        </div>
-                                        <div class="col-12">
-                                            <p class="small mb-0">ມີບັນຊີຢູ່ແລ້ວບໍ? <a href="{% url 'login' %}">ເຂົ້າ​ສູ່​ລະ​ບົບ</a></p>
+                                            <button class="btn btn-primary w-100" type="submit">ຢັ້ງຢືນ</button>
                                         </div>
                                     </form>
                                 </div>
