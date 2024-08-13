@@ -10,8 +10,7 @@ from users.models import UserModel
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.decorators import login_required
 from .forms import (MemberRegistrationForm, MemberEditForm, EmployeeRegistrationForm, EmployeeEditForm, 
-                    EmployeeForm, BookForm, UploadBookFormSet, MemberForm, CategoryForm, 
-                    AdminMemberCreationForm, AdminEmployeeCreationForm, EmailForm, OTPForm)
+                    BookForm, CategoryForm, AdminMemberCreationForm, AdminEmployeeCreationForm, EmailForm, OTPForm)
 from django.core.paginator import Paginator
 from django.contrib import messages
 from django.core.mail import EmailMessage
@@ -58,33 +57,6 @@ def send_otp_email(request):
 
     return render(request, 'send_otp_email.html', {'form': form})
 
-
-def verify_otp2(request):
-    if request.method == 'POST':
-        form = OTPForm(request.POST)
-        if form.is_valid():
-            otp = form.cleaned_data['otp']
-            otp_email = request.session.get('otp_email')
-            otp_expiry = request.session.get('otp_expiry')
-            stored_otp = request.session.get('otp')
-            
-            if not otp_email or not otp_expiry or not stored_otp:
-                messages.error(request, 'No verification code was sent to that email.')
-            elif timezone.now().timestamp() > otp_expiry:
-                messages.error(request, 'The verification code has expired.')
-            elif otp != stored_otp:
-                messages.error(request, 'Invalid verification code.')
-            else:
-                messages.success(request, 'Email verification has been completed.')
-                # Clear the session data
-                del request.session['otp']
-                del request.session['otp_email']
-                del request.session['otp_expiry']
-                return redirect('login')
-    else:
-        form = OTPForm()
-
-    return render(request, 'verify_otp.html', {'form': form})
 
 def verify_otp(request):
     if request.method == 'POST':
@@ -159,27 +131,6 @@ def book_detail(request, book_id):
     page_obj = paginator.get_page(page_number)
     return render(request, 'book_detail.html', {'book': book, 'uploads': uploads, 'page_obj': page_obj})
 
-def register_member2(request):
-    if request.method == 'POST':
-        form = MemberRegistrationForm(request.POST)
-        email = request.POST.get('email')
-        
-        if UserModel.objects.filter(email=email).exists():
-            messages.error(request, 'ອີເມວນີ້ມີຢູ່ແລ້ວ.')
-        elif form.is_valid():
-            user = form.save(commit=False)
-            user.is_active = True  
-            user.save()
-            Member.objects.create(user=user, address=form.cleaned_data['address'], phone=form.cleaned_data['phone'])
-            messages.success(request, 'ການລົງທະບຽນສຳເລັດແລ້ວ! ບັນຊີຂອງທ່ານຕ້ອງໄດ້ຮັບການອະນຸມັດຈາກຜູ້ເບິ່ງແຍງລະບົບກ່ອນທີ່ທ່ານຈະສາມາດເຂົ້າສູ່ລະບົບໄດ້.')
-            return redirect('login')
-        else:
-            messages.error(request, 'ເກີດຄວາມຜິດພາດໃນການສະໝັກສະມາຊິກ. ກະລຸນາຕື່ມຂໍ້ມູນໃຫ້ຄົບ.')
-    else:
-        form = MemberRegistrationForm()
-    
-    return render(request, 'registration/register_member.html', {'form': form})
-
 
 def register_member(request):
     if request.method == 'POST':
@@ -210,17 +161,6 @@ def register_member(request):
     return render(request, 'registration/register_member.html', {'form': form})
 
 
-def register_employee(request):
-    if request.method == 'POST':
-        form = EmployeeRegistrationForm(request.POST)
-        if form.is_valid():
-            user = form.save()
-            login(request, user)
-            return redirect('home')  # Redirect to a home page or any other page after registration
-    else:
-        form = EmployeeRegistrationForm()
-    return render(request, 'registration/register_employee.html', {'form': form})
-
 def login_view(request):
     if request.method == 'POST':
         email = request.POST.get('email')
@@ -250,9 +190,11 @@ def login_view(request):
     
     return render(request, 'registration/login.html')
 
+
 def logout_view(request):
     logout(request)
     return redirect('login')
+
 
 def download_book(request, book_id):
     book = get_object_or_404(Book, id=book_id)
@@ -342,10 +284,6 @@ def book_delete(request, pk):
     messages.success(request, 'ລຶບຂໍ້ມູນປຶ້ມສຳເລັດແລ້ວ!')
     return redirect(reverse('book_list'))
 
-# @staff_member_required
-# def book_list(request):
-#     books = Book.objects.all().order_by('-id')
-#     return render(request, 'admin/book/book_list.html', {'books': books})
 
 @staff_member_required
 def book_list(request):
@@ -366,7 +304,7 @@ def book_list(request):
     return render(request, 'admin/book/book_list.html', {'books': books, 'categories': categories, 'category_id': category_id, 'is_public': is_public, 'book_count': book_count,})
 
 
-# Employee management
+# Dashboard
 @staff_member_required
 def admin_dashboard(request):
     employee_count = Employee.objects.count()
@@ -390,6 +328,8 @@ def admin_dashboard(request):
     
     return render(request, 'admin/dashboard.html', context)
 
+
+# Employee management
 @staff_member_required
 def employee_create(request):
     if request.method == 'POST':

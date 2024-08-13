@@ -31,25 +31,7 @@ class MemberForm(forms.ModelForm):
         model = Member
         fields = ['address', 'phone']
         
-class UserRegistrationForm2(UserCreationForm):
-    address = forms.CharField(max_length=255, required=False)
-    phone = forms.CharField(max_length=15, required=False)
-
-    class Meta:
-        model = UserModel
-        fields = ['email', 'password1', 'password2', 'address', 'phone']
-
-    def save(self, commit=True):
-        user = super().save(commit=False)
-        if commit:
-            user.save()
-            Member.objects.create(
-                user=user,
-                address=self.cleaned_data['address'],
-                phone=self.cleaned_data['phone']
-            )
-        return user
-
+        
 class AdminMemberCreationForm(UserCreationForm):
     email = forms.EmailField(required=True)
     address = forms.CharField(required=False)
